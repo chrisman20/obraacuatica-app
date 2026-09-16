@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ObraAcuática — Estudio de Fabricación y Construcción de Piletas</title>
+<meta name="description" content="Configurador profesional de piletas: arena estilo Bali, construccion tradicional, prefabricadas GRC de fabrica, naturales y borde infinito. Calculo de geometria, materiales, hidraulica, filtracion, quimica del agua, protocolos de obra y presupuesto.">
+<meta name="theme-color" content="#1FB6CD">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ObraAcuática">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=4.0">
+</head>
+<body data-app="obracuatica">
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">OA</div>
+    <div class="brand-txt">
+      <h1>ObraAcuática</h1>
+      <p>Fabricación y construcción de piletas · <span id="dbVersion">v1.0</span> · <kbd title="Ctrl+K">⌘K</kbd></p>
+    </div>
+    <div class="user-chip hidden" id="userChip"></div>
+  </div>
+  <div style="display:flex;gap:0.5rem;align-items:center">
+    <button class="btn mini" onclick="Enterprise.Health.open()" title="🩺 Health Dashboard" type="button">🩺</button>
+    <button class="btn mini" onclick="Enterprise.SelfTest.run()" title="🧪 Tests" type="button">🧪</button>
+    <button class="btn mini" onclick="Enterprise.Theme.toggle()" title="🌓 Tema" type="button">🌓</button>
+  </div>
+</header>
+  <nav class="tabs" id="mainTabs">
+    <div class="tab-group" id="roleHomeGroup">
+      <span class="tg-label">Mi área</span>
+      <div class="tg-btns">
+        <button data-tab="cliente" type="button" id="btnTabCliente">👤 Inicio</button>
+        <button data-tab="proveedor" type="button" id="btnTabProveedor">🚚 Mi panel</button>
+      </div>
+    </div>
+    <div class="tab-group" id="grpDiseno">
+      <span class="tg-label">Diseño</span>
+      <div class="tg-btns">
+        <button data-tab="config" class="active" type="button">1 · Configurá</button>
+        <button data-tab="results" type="button">2 · Resultados</button>
+        <button data-tab="filtration" type="button">3 · Filtración</button>
+        <button data-tab="chemistry" type="button">4 · Química</button>
+        <button data-tab="planos" type="button">5 · Planos</button>
+      </div>
+    </div>
+    <div class="tab-group" id="grpConstruccion">
+      <span class="tg-label">Construcción</span>
+      <div class="tg-btns">
+        <button data-tab="protocols" type="button">6 · Protocolos</button>
+        <button data-tab="obra" type="button">7 · Obra</button>
+      </div>
+    </div>
+    <div class="tab-group" id="grpNegocio">
+      <span class="tg-label">Negocio</span>
+      <div class="tg-btns">
+        <button data-tab="budget" type="button">8 · Presupuesto</button>
+        <button data-tab="planes" type="button">9 · Planes</button>
+      </div>
+    </div>
+    <div class="tab-group" id="grpRecursos">
+      <span class="tg-label">Recursos</span>
+      <div class="tg-btns">
+        <button data-tab="factory" type="button">🏭 Fábrica</button>
+        <button data-tab="ia" type="button">🤖 IA</button>
+        <button data-tab="cuenta" type="button">🔐 Cuenta</button>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ============ LANDING HERO ============ -->
+  <section class="landing" id="landing">
+    <div class="landing-bg" id="landingBg"></div>
+    <div class="landing-overlay"></div>
+    <div class="landing-content">
+      <div class="landing-kicker">Estudio de fabricación &amp; construcción de piletas</div>
+      <h1 class="landing-title">Diseñá, calculá y construí<br><em>piletas que se venden solas.</em></h1>
+      <p class="landing-sub">Diez sistemas constructivos —del contenedor marítimo al borde infinito de vidrio— con hidráulica, química, protocolos de obra, fábrica de prefabricados, presupuesto con proveedores reales y asistente IA. Todo en una sola herramienta.</p>
+      <div class="landing-cta">
+        <button class="btn primary big" id="ctaConfig" type="button">⚡ Probá GRATIS — configurá tu pileta en 2 minutos</button>
+        <button class="btn ghost big" id="ctaPlanos" type="button">📐 Ver un plano en vivo</button>
+      </div>
+      <p class="landing-free" style="margin-top:0.7rem;font-size:0.78rem;color:rgba(226,239,246,0.65)">
+        ✅ Sin registro para probar · ✅ 3 exports gratis por mes · ✅ Funciona offline en tu celular
+      </p>
+      <div class="landing-stats">
+        <div><b>10</b><span>sistemas</span></div>
+        <div><b>4</b><span>planos SVG</span></div>
+        <div><b>9</b><span>proveedores por zona</span></div>
+        <div><b>IA</b><span>offline + online</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SELECTOR DE ROL ============ -->
+  <section class="roles" id="roles">
+    <div class="roles-title">
+      <h2>¿Quién sos hoy?</h2>
+      <p>La app se adapta a vos: cada área muestra solo lo que te interesa.</p>
+    </div>
+    <div class="roles-grid">
+      <button class="role-card" data-role="cliente" type="button">
+        <div class="rc-icon">👤</div>
+        <div class="rc-name">Cliente</div>
+        <div class="rc-desc">Quiero una pileta: qué me conviene, cuánto puede salirme y qué exigirle al constructor.</div>
+        <div class="rc-cta">Explorar como cliente →</div>
+      </button>
+      <button class="role-card featured" data-role="pro" type="button">
+        <div class="rc-badge">LA HERRAMIENTA COMPLETA</div>
+        <div class="rc-icon">🏗️</div>
+        <div class="rc-name">Profesional / Constructora</div>
+        <div class="rc-desc">Presupuestar, calcular hidráulica, planos, protocolos de obra, fábrica y seguimiento.</div>
+        <div class="rc-cta">Entrar al estudio →</div>
+      </button>
+      <button class="role-card" data-role="proveedor" type="button">
+        <div class="rc-icon">🚚</div>
+        <div class="rc-name">Proveedor</div>
+        <div class="rc-desc">Corralón, ferretería o casa de piscinas: qué están comprando los constructores y cómo ofrecer mis ofertas.</div>
+        <div class="rc-cta">Ver el panel →</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ ÁREA CLIENTE ============ -->
+  <section id="tab-cliente" class="tab-panel">
+    <div class="grid-2">
+      <div class="card" style="grid-column:1/-1">
+        <h2>👤 Tu pileta paso a paso — sin tecnicismos</h2>
+        <p class="hint">Elegí el estilo, larguito y ancho, y te digo <b>cuánto puede salirte, cuánto tarda la obra y qué cosas tenés que exigir</b>. Precio orientativo de mercado (varía por zona y terminaciones).</p>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h2>1 · ¿Qué estilo te gusta?</h2>
+        <div id="clTypes"></div>
+      </div>
+      <div class="card">
+        <h2>2 · Medidas y profundidad</h2>
+        <div class="form-row">
+          <label>Largo <span class="unit">m</span> <input type="range" id="clL" min="3" max="12" step="0.5" value="8" oninput="document.getElementById('clLv').textContent=this.value+' m'"></label>
+          <label>Ancho <span class="unit">m</span> <input type="range" id="clW" min="2" max="6" step="0.5" value="4" oninput="document.getElementById('clWv').textContent=this.value+' m'"></label>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin:-0.5rem 0 0.8rem;color:var(--aqua-bright);font-weight:700">
+          <span id="clLv">8 m</span><span id="clWv">4 m</span>
+        </div>
+        <div class="form-row">
+          <label>Profundidad
+            <select id="clDepth">
+              <option value="chapita">Chapita (1,0-1,3 m) — chicos y reposeras</option>
+              <option value="familiar" selected>Familiar (1,4-1,7 m) — la más elegida</option>
+              <option value="nadadora">Nadadora (1,8-2,2 m) — trampoline y nado</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="chk"><input type="checkbox" id="clLights" checked> 💡 Luces para la noche</label>
+          <label class="chk"><input type="checkbox" id="clHeat"> 🌡️ Calefacción (usarla todo el año)</label>
+          <label class="chk"><input type="checkbox" id="clInfinity"> ∞ Borde infinito (el efecto premium)</label>
+        </div>
+      </div>
+      <div class="card" id="clResultCard">
+        <h2>Tu estimación</h2>
+        <div id="clResult"></div>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h2>3 · Las 8 preguntas que tenés que hacerle ANTES de firmar</h2>
+        <ol class="cl-questions" id="clQuestions"></ol>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h2>4 · Tu primera lista de compras (mantenimiento)</h2>
+        <p class="hint">Lo que vas a necesitar sí o sí desde el día uno — pedilo en cualquier casa de piscinas:</p>
+        <div id="clKit" class="table-wrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ÁREA PROVEEDOR ============ -->
+  <section id="tab-proveedor" class="tab-panel">
+    <div class="grid-2">
+      <div class="card" style="grid-column:1/-1">
+        <h2>🚚 Panel del proveedor</h2>
+        <p class="hint">Sos corralón, ferretería, casa de piscinas o servicio: acá ves <b>qué compran los constructores</b> cuando presupuestan con ObraAcuática y podés <b>publicar tus ofertas</b> para tu zona.</p>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h2>📊 Qué están comprando (demanda típica de una pileta 8×4)</h2>
+        <div id="pvDemanda" class="table-wrap"></div>
+        <p class="hint">Volúmenes de referencia calculados sobre una pileta familiar 8×4 con venecita. Los constructores de tu zona piden esto todos los meses.</p>
+      </div>
+      <div class="card">
+        <h2>📣 Publicar mi oferta</h2>
+        <div class="form-row"><label>Nombre de mi negocio <input type="text" id="pvName" placeholder="Corralón El Puente"></label></div>
+        <div class="form-row">
+          <label>Rubro
+            <select id="pvCat"></select>
+          </label>
+          <label>Ciudad / zona <input type="text" id="pvCity" placeholder="Corrientes Capital"></label>
+        </div>
+        <div class="form-row"><label>WhatsApp (con característica) <input type="text" id="pvPhone" placeholder="3794xxxxxxx"></label></div>
+        <div class="form-row">
+          <label>Oferta (título) <input type="text" id="pvOfferTitle" placeholder="Cemento portland 50 kg — oferta primavera"></label>
+          <label>Precio <span class="unit">ARS</span> <input type="number" id="pvOfferPrice" placeholder="0"></label>
+        </div>
+        <div class="form-row"><label>Detalle <input type="text" id="pvOfferDetail" placeholder="Válido hasta fin de mes · entrega incluida en radio 30 km"></label></div>
+        <button class="btn primary" id="pvPublish" type="button">Publicar oferta</button>
+        <p class="hint" id="pvMsg" style="margin:0.5rem 0 0"></p>
+      </div>
+      <div class="card">
+        <h2>🏷️ Ofertas de tu zona</h2>
+        <div id="pvOffers"></div>
+      </div>
+      <div class="card" style="grid-column:1/-1">
+        <h2>🤝 Sumarme al directorio de constructores</h2>
+        <p class="hint">Al guardar tus datos de negocio también quedás en el <b>directorio de proveedores</b> que ven los constructores al presupuestar cada rubro (con tu WhatsApp a un click). En la versión online, tus ofertas llegan directo a sus pantallas.</p>
+        <button class="btn" id="pvRegister" type="button">Agregar mi negocio al directorio</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FÁBRICA: publicidad rústica en el landing ============ -->
+  <section class="fabrica-landing">
+    <div class="fabrica-header">
+      <h2>🏭 <span>De nuestra fábrica</span> directo a tu obra</h2>
+      <p>Fabricamos lo que vendemos — paneles GRC, pastinas, revestimientos y moldes propios. Sin intermediarios.</p>
+    </div>
+    <div class="fabrica-strip" id="fabricaLanding"></div>
+  </section>
+
+  <!-- ============ TAB 1: CONFIGURÁ ============ -->
+  <section id="tab-config" class="tab-panel active">
+
+      <div class="card" style="grid-column:1/-1">
+        <h2>01 · Elegí tu tipo de pileta</h2>
+        <p class="hint">Deslizá la tira y tocá una foto — abajo vas viendo el detalle del que elegís.</p>
+        <div id="typeCards"></div>
+      </div>
+
+      <div class="card hero-card" id="heroCard">
+        <div class="hero-art" id="heroArt"></div>
+        <div class="hero-info">
+          <div class="hero-kicker">tu proyecto</div>
+          <h2 id="heroName" style="color:var(--txt)">Arena / Bali</h2>
+          <p id="heroDesc" class="hero-desc"></p>
+          <div class="hero-meta">
+            <span class="tag aqua" id="heroTime"></span>
+            <span class="tag aqua" id="heroBorder"></span>
+          </div>
+          <div class="form-row" style="margin:0.8rem 0 0">
+            <label style="flex:3">Nombre del proyecto / cliente
+              <input type="text" id="pjName" placeholder="Ej: Pileta García 4x8">
+            </label>
+            <div style="align-self:end;display:flex;gap:0.5rem">
+              <button class="btn" id="pjSave" type="button">💾 Guardar proyecto</button>
+              <button class="btn" id="abSet" type="button" title="Deja esta configuración fija para comparar contra cualquier cambio">⚖️ Fijar como A</button>
+            </div>
+          </div>
+          <p class="hint" id="abMsg" style="margin:0.5rem 0 0"></p>
+        </div>
+      </div>
+
+      <div class="card hidden" id="pjListCard">
+        <h2>Mis proyectos guardados</h2>
+        <div id="pjList" class="chip-grid"></div>
+        <p class="hint" id="pjMsg" style="margin:0.5rem 0 0"></p>
+      </div>
+
+    <div class="grid-2">
+
+      <div class="card">
+        <h2>02 · Geometría</h2>
+        <div class="form-row">
+          <label>Forma
+            <select id="fShape">
+              <option value="rect">Rectangular</option>
+              <option value="roman">Romana (rectangular + escaleras)</option>
+              <option value="free">Orgánica / libre (estilo Bali)</option>
+              <option value="oval">Ovalada</option>
+            </select>
+          </label>
+          <label>Largo <span class="unit">m</span>
+            <input type="number" id="fLen" value="8" min="2" max="30" step="0.1">
+          </label>
+          <label>Ancho <span class="unit">m</span>
+            <input type="number" id="fWidth" value="4" min="1.5" max="15" step="0.1">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Profundidad mínima <span class="unit">m</span>
+            <input type="number" id="fDepthMin" value="1.0" min="0.3" max="2.5" step="0.05">
+          </label>
+          <label>Profundidad máxima <span class="unit">m</span>
+            <input type="number" id="fDepthMax" value="1.7" min="0.5" max="3.5" step="0.05">
+          </label>
+          <label class="chk">
+            <input type="checkbox" id="fSolarium" checked>
+            Solarium húmedo interno (playa de 30 cm)
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Ancho solarium <span class="unit">m</span>
+            <input type="number" id="fSolW" value="3" min="1" max="8" step="0.5">
+          </label>
+          <label>Uso de la pileta
+            <select id="fUse">
+              <option value="res">Privada / familiar</option>
+              <option value="semi">Semi-pública (hotel, club)</option>
+              <option value="pub">Pública (municipal, escuela)</option>
+            </select>
+          </label>
+        </div>
+        <div id="geoWarn" class="warn hidden"></div>
+      </div>
+
+      <div class="card">
+        <h2>03 · Borde y deck</h2>
+        <div class="form-row">
+          <label>Tipo de borde (línea de agua)
+            <select id="fBorderType">
+              <option value="skimmer">Skimmer clásico (borde seco)</option>
+              <option value="rebose">Rebose perimetral (espejo a ras)</option>
+              <option value="infinity1">Borde infinito — un lado</option>
+              <option value="infinityP">Borde infinito — perimetral</option>
+            </select>
+          </label>
+          <label>Coping / cordón perimetral
+            <select id="fCopingType">
+              <option value="stone">Piedra bola / laja</option>
+              <option value="grc">Losas GRC de fábrica</option>
+              <option value="brick">Ladrillo / cerámico</option>
+              <option value="wood">Madera composite</option>
+              <option value="mosaic">Bulón 40 / venecita</option>
+              <option value="none">Sin coping</option>
+            </select>
+          </label>
+        </div>
+        <div id="infinityBox" class="sub-box hidden">
+          <div class="form-row">
+            <label>Desnivel del terreno
+              <select id="fTerrain">
+                <option value="slope">En desnivel (ideal)</option>
+                <option value="flat">Terreno plano (requiere obra extra)</option>
+              </select>
+            </label>
+          </div>
+          <p class="hint">Este borde agrega canaleta de rebalse, estanque compensador (7% del volumen) y segunda bomba. Se calcula en la pestaña 2 y el protocolo va en la 5.</p>
+        </div>
+        <div class="form-row">
+          <label class="chk">
+            <input type="checkbox" id="fDeck">
+            Solarium seco / deck perimetral
+          </label>
+          <label>Ancho del deck <span class="unit">m</span>
+            <input type="number" id="fDeckW" value="2" min="0.5" max="6" step="0.25">
+          </label>
+          <label>Material del deck
+            <select id="fDeckMat">
+              <option value="madera">Madera composite</option>
+              <option value="piedra">Laja / piedra</option>
+              <option value="hormigon">Hormigón pulido</option>
+              <option value="cesped">Césped</option>
+              <option value="atermico">Losetas atérmicas GRC (de fábrica)</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint">El solarium <b>húmedo</b> (playa de 30 cm DENTRO de la pileta) se configura en Geometría; el <b>seco</b> es la vereda/deck alrededor — entra al cálculo de materiales y al plano.</p>
+      </div>
+
+      <div class="card">
+        <h2>04 · Revestimiento y terminación</h2>
+        <div class="form-row">
+          <label>Revestimiento
+            <select id="fFinish"></select>
+          </label>
+          <label>Cordón / coping
+            <select id="fCopingType">
+              <option value="none">Sin coping</option>
+              <option value="stone">Piedra bola / laja</option>
+              <option value="grc">Losas GRC de fábrica</option>
+              <option value="brick">Ladrillo / cerámico</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Desperdicio de cortes <span class="unit">%</span>
+            <input type="number" id="fWaste" value="8" min="3" max="20" step="1">
+          </label>
+          <label>m² por caja de revestimiento
+            <input type="number" id="fBoxM2" value="2.07" min="0.5" max="4" step="0.01">
+          </label>
+        </div>
+        <p class="hint">El revestimiento "simil Bali" (venecita 10x10 verde tipo Palau) viene en placas de 30x30 ≈ 2,07 m²/caja. Verificá siempre el m² real por caja del proveedor: varía de 1,40 a 2,14 m².</p>
+      </div>
+
+      <div class="card">
+        <h2>05 · Detalles y confort</h2>
+        <p class="hint">Luces, escalera, calefacción y el resto del equipamiento que convierte una cuba de agua en LA pileta. Todo entra al cálculo hidráulico/eléctrico y al presupuesto.</p>
+        <div class="form-row">
+          <label class="chk">
+            <input type="checkbox" id="fLights" checked>
+            Luces sumergibles LED (1 cada 4 m + transformador)
+          </label>
+          <label class="chk">
+            <input type="checkbox" id="fLadder" checked>
+            Escalera inoxidable desmontable
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="chk">
+            <input type="checkbox" id="fHeat">
+            Calefacción: bomba de calor (según volumen)
+          </label>
+          <label class="chk">
+            <input type="checkbox" id="fCover">
+            Cobertor térmico + enrollador
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="chk">
+            <input type="checkbox" id="fShower">
+            Ducha exterior de pileta
+          </label>
+          <label class="chk">
+            <input type="checkbox" id="fRobot">
+            Robot limpiador de fondo
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column:1/-1">
+      <h2>06 · Innovaciones</h2>
+      <p class="hint">Tocá las que quieras sumar al proyecto: entran al presupuesto. Las que marcan <span class="tag aqua">FÁBRICA</span> salen de nuestra propia planta de prefabricados.</p>
+      <div id="innChips" class="chip-grid"></div>
+    </div>
+
+    <div class="next-step">
+      <button class="btn primary" id="goResults" type="button">Calcular proyecto →</button>
+    </div>
+  </section>
+
+  <!-- ============ TAB 2: RESULTADOS ============ -->
+  <section id="tab-results" class="tab-panel">
+    <div class="card">
+      <h2>Geometría y volumen</h2>
+      <div id="resGeo" class="kpi-grid"></div>
+      <div id="geoBreakdown"></div>
+    </div>
+    <div class="card">
+      <h2>Hidráulica resumida</h2>
+      <div id="resHyd" class="kpi-grid"></div>
+      <p class="hint">El detalle completo de filtros, bombas, cañerías y accesorios va en la pestaña 3.</p>
+    </div>
+    <div class="card" id="flotCard">
+      <h2>⚓ Flotación — napa alta (pileta vacía)</h2>
+      <div id="flotBox"></div>
+    </div>
+
+    <div class="card hidden" id="abCard">
+      <h2>⚖️ Comparador A/B — ¿cuál le conviene a tu cliente?</h2>
+      <p class="hint">Fijaste una configuración como <b>A</b>: ahora todo lo que cambies en Configurá se compara en vivo acá. Ideal para cerrar la venta entre dos opciones.</p>
+      <div id="abBody"></div>
+    </div>
+    <div class="card">
+      <h2>Materiales de revestimiento</h2>
+      <div id="resMat" class="kpi-grid"></div>
+      <div id="matBreakdown"></div>
+    </div>
+
+    <div class="card" id="colorCard">
+      <h2>🎨 Color de agua y paleta — según tu revestimiento</h2>
+      <div id="colorBody"></div>
+    </div>
+
+    <div class="card" id="infResultsCard">
+      <h2>Borde infinito — cálculo específico</h2>
+      <div id="resInf" class="kpi-grid"></div>
+    </div>
+
+    <div class="card hidden" id="thermalCard">
+      <h2>🌡️ Climatización — balance térmico</h2>
+      <div class="form-row">
+        <label>Temperatura objetivo <span class="unit">°C</span>
+          <input type="number" id="thTarget" value="28" min="24" max="34" step="1">
+        </label>
+        <label>Tarifa eléctrica <span class="unit">ARS/kWh</span>
+          <input type="number" id="thTariff" value="350" min="50" max="2000" step="10">
+        </label>
+      </div>
+      <div id="thermalBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 3: FILTRACIÓN ============ -->
+  <section id="tab-filtration" class="tab-panel">
+    <div class="card">
+      <h2>Sistema de filtración — comparador</h2>
+      <p class="hint">Filtración (saca mugre) y desinfección (mata bichos) son cosas distintas: sal, UV y ozono son desinfección y siempre necesitan un filtro mecánico atrás. Los combinables están marcados.</p>
+      <div class="form-row">
+        <label>Filtración mecánica
+          <select id="fFilter"></select>
+        </label>
+        <label>Desinfección / complemento
+          <select id="fSanitizer">
+            <option value="cl">Cloro manual</option>
+            <option value="salt">Electrólisis salina</option>
+            <option value="uv">UV + cloro residual</option>
+            <option value="ozone">Ozono + cloro residual</option>
+            <option value="activeo2">Oxígeno activo</option>
+            <option value="none">Sin química (pileta natural)</option>
+          </select>
+        </label>
+      </div>
+      <div id="filterCompare" class="table-wrap"></div>
+    </div>
+    <div class="card">
+      <h2>Dimensionado del equipo</h2>
+      <div id="filterSizing" class="kpi-grid"></div>
+      <div id="filterDetail"></div>
+    </div>
+    <div class="card">
+      <h2>Sala de máquinas — esquema recomendado</h2>
+      <div id="machineRoom" class="schema"></div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 4: QUÍMICA ============ -->
+  <section id="tab-chemistry" class="tab-panel">
+    <div class="card">
+      <h2>Parámetros objetivo del agua</h2>
+      <p class="hint">Valores de referencia para pileta privada con revestimiento de venecita o cementicio. Con venecita cuidá la dureza (el yeso de la venecita se ataca con agua blanda); con revestimiento cementicio cuidá el pH alto sostenido.</p>
+      <div id="chemTargets" class="table-wrap"></div>
+    </div>
+    <div class="card">
+      <h2>Chequeo y corrección del agua</h2>
+      <div class="form-row">
+        <label>Volumen detectado <span class="unit">m³</span>
+          <input type="number" id="cVol" readonly>
+        </label>
+        <label>pH medido
+          <input type="number" id="cPH" value="7.2" min="6.4" max="8.4" step="0.05">
+        </label>
+        <label>Cloro libre medido <span class="unit">ppm</span>
+          <input type="number" id="cCl" value="0.5" min="0" max="10" step="0.1">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Alcalinidad <span class="unit">ppm</span>
+          <input type="number" id="cAlk" value="70" min="0" max="300" step="5">
+        </label>
+        <label>Dureza cálcica <span class="unit">ppm</span>
+          <input type="number" id="cHard" value="180" min="0" max="1000" step="10">
+        </label>
+        <label>Ác. cianúrico <span class="unit">ppm</span>
+          <input type="number" id="cCyA" value="30" min="0" max="200" step="5">
+        </label>
+      </div>
+      <button class="btn" id="btnChem" type="button">Calcular correcciones</button>
+      <div id="chemActions"></div>
+      <p class="hint disclaimer">⚠️ Las dosificaciones son orientativas (regla de arranque del rubro) y dependen de la temperatura, el uso y la carga orgánica. Agregá, circulá 30-60 min y volvé a medir antes de seguir. Nunca mezclés productos distintos en seco o concentrados.</p>
+    </div>
+    <div class="card">
+      <h2>Rutina de mantenimiento</h2>
+      <div id="chemRoutine"></div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 6: GUÍA PASO A PASO + PROTOCOLOS ============ -->
+  <section id="tab-protocols" class="tab-panel">
+    <div class="card">
+      <h2>📚 Guía paso a paso — te llevamos de la mano</h2>
+      <p class="hint">Elegí quién sos y qué pileta querés construir. Te guiamos <b>un paso por vez</b> con las cosas que NO te podés saltear.</p>
+      <div class="form-row">
+        <label>Soy…
+          <select id="guiaMode">
+            <option value="cliente">👤 Cliente (quiero entender qué hace el constructor)</option>
+            <option value="pro" selected>🏗️ Constructor / Piletero (modo técnico)</option>
+          </select>
+        </label>
+        <label>Sistema
+          <select id="guiaType"></select>
+        </label>
+      </div>
+      <div id="guiaWizard"></div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Protocolo completo (referencia rápida)</h2>
+      <p class="hint">Para los que prefieren ver toda la lista de una vez en vez del paso a paso.</p>
+      <div class="form-row">
+        <label>Sistema
+          <select id="pType"></select>
+        </label>
+        <label>Fase
+          <select id="pPhase">
+            <option value="pre">Pre-obra y relevamiento</option>
+            <option value="struct">Estructura</option>
+            <option value="water">Impermeabilización y revestimiento</option>
+            <option value="install">Equipo e instalaciones</option>
+            <option value="startup">Puesta en marcha</option>
+            <option value="maint">Mantenimiento anual</option>
+            <option value="winter">Invernada</option>
+          </select>
+        </label>
+      </div>
+      <div id="protocolBody"></div>
+    </div>
+
+    <div class="card" id="fabricaAd" style="border:2px dashed var(--gold);background:linear-gradient(165deg,rgba(216,179,106,0.06),rgba(7,32,47,0.6))">
+      <h2 style="color:var(--gold)">🏭 De nuestra fábrica — directo a tu obra</h2>
+      <p class="hint" style="color:var(--muted)">Fabricamos lo que vendemos. Sin intermediarios, con control de calidad propio.</p>
+      <div class="fabrica-grid" id="fabricaGrid"></div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 6: FÁBRICA ============ -->
+  <section id="tab-factory" class="tab-panel">
+    <div class="card">
+      <h2>Fórmulas de fábrica — línea pileta</h2>
+      <p class="hint">Formulaciones propias validadas (abril 2026, v2.0 corregida): sin cal (se lixivia con cloro) y sin sorbitol (hincha la matriz). Todo lo que podés fabricar vos para abastecer tus propias obras y vender a terceros.</p>
+      <div class="form-row">
+        <label>Fórmula
+          <select id="ffFormula"></select>
+        </label>
+        <label>Lote a fabricar <span class="unit">kg</span>
+          <input type="number" id="ffBatch" value="10" min="1" max="500" step="1">
+        </label>
+      </div>
+      <div id="factoryBody"></div>
+    </div>
+    <div class="card">
+      <h2>Prefabricados GRC — producción con moldes propios</h2>
+      <div id="grcBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 7: PRESUPUESTO ============ -->
+  <section id="tab-budget" class="tab-panel">
+    <div class="card">
+      <h2>Presupuesto de materiales</h2>
+      <p class="hint">Precios referenciales de septiembre 2026 (ARS) — editalos que quedan guardados en tu navegador. Tocá cualquier celda de <b>"Dónde comprarlo"</b> y te doy opciones de proveedores reales para TU zona: cadenas nacionales, tu directorio local, tiendas online y búsqueda directa en Google Maps y MercadoLibre.</p>
+      <div class="form-row">
+        <label>Provincia
+          <select id="zProv"></select>
+        </label>
+        <label>Ciudad
+          <select id="zCity"></select>
+        </label>
+        <label>Radio de búsqueda <span class="unit">km</span>
+          <input type="number" id="zKm" value="30" min="1" max="500" step="5">
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Ajuste general de precios <span class="unit">%</span>
+          <input type="number" id="bAdj" value="0" min="-50" max="200" step="5">
+        </label>
+        <label>Contingencia <span class="unit">%</span>
+          <input type="number" id="bCont" value="10" min="0" max="30" step="1">
+        </label>
+        <label>Margen de obra <span class="unit">%</span>
+          <input type="number" id="bMargin" value="35" min="0" max="200" step="5">
+        </label>
+        <label class="chk">
+          <input type="checkbox" id="bIva" checked>
+          Sumar IVA al precio final
+        </label>
+        <label>Régimen de IVA de los materiales
+          <select id="bIvaRegime">
+            <option value="general">General — todo al 21%</option>
+            <option value="reducido">Obra adherida — lista al 10,5%</option>
+          </select>
+        </label>
+        <label>Precios actualizados al
+          <input type="date" id="bPriceDate">
+        </label>
+        <label class="chk">
+          <input type="checkbox" id="bClientMode">
+          Modo cliente (oculta costos internos)
+        </label>
+      </div>
+      <div id="budgetTable" class="table-wrap"></div>
+      <div id="budgetTotals"></div>
+      <div id="paymentPlan"></div>
+      <div class="next-step">
+        <button class="btn" id="btnXLS" type="button">📊 Excel</button>
+        <button class="btn" id="btnDOC" type="button">📝 Word</button>
+        <button class="btn" id="btnMD" type="button">🗂 Markdown</button>
+        <button class="btn" id="btnOdoo" type="button">📦 Odoo</button>
+        <button class="btn" id="btnCSV" type="button">⚙ CSV</button>
+        <button class="btn" id="btnPrint" type="button">🖨 PDF / Imprimir</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 8: PLANOS ============ -->
+  <section id="tab-planos" class="tab-panel">
+    <div class="card">
+      <h2>Planos del proyecto</h2>
+      <p class="hint">Generados en vivo desde tu configuración: planta con el equipamiento ubicado y cortes con profundidades. Descargalos como SVG o imprimilos. Son planos <b>orientativos de proyecto</b> — el ejecutivo lo firma ingeniería matriculada.</p>
+      <div class="form-row">
+        <label>Vista
+          <select id="plView">
+            <option value="planta">Planta — vista superior con equipamiento</option>
+            <option value="axo">Axonométrica 3D — conjunto</option>
+            <option value="corteT">Corte transversal A-A</option>
+            <option value="corteL">Corte longitudinal B-B</option>
+          </select>
+        </label>
+        <label>Rotulado
+          <select id="plDetail">
+            <option value="full">Completo (equipos + dimensiones)</option>
+            <option value="simple">Simple (solo geometría y dimensiones)</option>
+          </select>
+        </label>
+      </div>
+      <div class="plano-wrap" id="planoWrap"></div>
+      <div class="next-step">
+        <button class="btn" id="btnSVG" type="button">Descargar SVG</button>
+        <button class="btn" id="btnPrint2" type="button">Imprimir plano</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 9: OBRA ============ -->
+  <section id="tab-obra" class="tab-panel">
+    <div id="obraBody"></div>
+  </section>
+
+  <!-- ============ TAB 10: ASISTENTE IA ============ -->
+  <section id="tab-ia" class="tab-panel">
+    <div class="card ia-card">
+      <div class="ia-head">
+        <div>
+          <h2>Asistente especialista — compras · construcción · arquitectura</h2>
+          <p class="hint" style="margin-bottom:0">Responde con los números de TU proyecto. Doble motor: <b>offline</b> (experto local, siempre) y <b>online</b> (conectá tu IA). La conversación queda guardada.</p>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <button class="btn mini" id="iaClear" type="button" title="Borrar conversación">🗑️</button>
+          <div class="ia-status" id="iaStatus">⚪ offline</div>
+        </div>
+      </div>
+
+      <div class="ia-settings sub-box">
+        <div class="form-row" style="margin-bottom:0.5rem">
+          <label>Motor
+            <select id="iaPreset">
+              <option value="glm">GLM (Z.ai)</option>
+              <option value="openai">OpenAI</option>
+              <option value="deepseek">DeepSeek</option>
+              <option value="openrouter">OpenRouter</option>
+              <option value="custom">Personalizado</option>
+            </select>
+          </label>
+          <label>Modo
+            <select id="iaMode">
+              <option value="auto">Auto (online si está conectado)</option>
+              <option value="offline">Solo offline (sin internet)</option>
+            </select>
+          </label>
+        </div>
+        <div class="form-row" style="margin-bottom:0.5rem">
+          <label>Endpoint (base URL)
+            <input type="text" id="iaBase" placeholder="https://...">
+          </label>
+          <label>Modelo
+            <input type="text" id="iaModel" placeholder="glm-4-flash">
+          </label>
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label>API key — queda SOLO en este navegador 🔒
+            <input type="password" id="iaKey" placeholder="pegá tu clave (no se guarda en ningún otro lado)">
+          </label>
+          <div style="align-self:end;display:flex;gap:0.5rem">
+            <button class="btn" id="iaTest" type="button">Probar conexión</button>
+            <button class="btn primary" id="iaSave" type="button">Guardar</button>
+          </div>
+        </div>
+        <p class="hint" style="margin:0.6rem 0 0">🔐 La clave viaja únicamente al endpoint que elegiste, desde tu navegador. Nunca se incluye en exports ni informes. Sin clave, el experto offline sigue funcionando igual.</p>
+        <p id="iaTestMsg" class="hint" style="margin:0.3rem 0 0"></p>
+      </div>
+
+      <div class="chat-box" id="chatBox"></div>
+
+      <div class="chip-grid" id="iaChips" style="margin:0.7rem 0">
+        <button class="chip" type="button">¿Qué sistema me conviene?</button>
+        <button class="chip" type="button">¿Qué equipo necesito?</button>
+        <button class="chip" type="button">Compará arena vs contenedor</button>
+        <button class="chip" type="button">El agua está verde</button>
+        <button class="chip" type="button">¿Cómo cobro esta pileta?</button>
+        <button class="chip" type="button">¿Dónde compro más barato?</button>
+        <button class="chip" type="button">Borde infinito</button>
+        <button class="chip" type="button">Cronograma de obra</button>
+      </div>
+
+      <div class="form-row" style="margin-bottom:0">
+        <label style="flex:6">Tu consulta
+          <input type="text" id="iaInput" placeholder="Preguntame lo que sea: técnica, de compras, de negocio…">
+        </label>
+        <div style="align-self:end"><button class="btn primary" id="iaSend" type="button">Enviar ➤</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAB 11: CUENTA / SEGURIDAD ============ -->
+  <section id="tab-cuenta" class="tab-panel">
+    <div id="authBody"></div>
+  </section>
+
+  <!-- ============ TAB 12: PLANES & LEGAL ============ -->
+  <section id="tab-planes" class="tab-panel">
+    <div class="card">
+      <h2>Planes de ObraAcuática</h2>
+      <p class="hint">Empezá gratis. Cuando necesites más, pasate a Pro con un click (Mercado Pago).</p>
+      <div class="planes-grid">
+        <div class="plan-card">
+          <div class="plan-name">Gratis</div>
+          <div class="plan-price">$0<span>/siempre</span></div>
+          <ul>
+            <li>✔ 10 sistemas + hidráulica + química + planos en pantalla</li>
+            <li>✔ Todo lo que ves ahora — sin registro</li>
+            <li>✔ <b>3 exports por mes</b> (para probar)</li>
+            <li>✔ Con marca ObraAcuática en los informes</li>
+          </ul>
+          <button class="btn" disabled type="button">Ya lo estás usando ✅</button>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-badge">PARA TRABAJAR EN SERIO</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">USD 15<span>/mes</span><small> ≈ $18.000 ARS · cancelá cuando quieras</small></div>
+          <ul>
+            <li>✔ <b>Exports ILIMITADOS</b> (Excel · Word · PDF · MD · CSV · Odoo)</li>
+            <li>✔ Sin marca de agua en planos e informes</li>
+            <li>✔ Seguimiento de obra + cronograma con fechas</li>
+            <li>✔ Informe de cliente HTML profesional</li>
+            <li>✔ Proyectos guardados ilimitados</li>
+            <li>✔ Comparador A/B de configuraciones</li>
+            <li>✔ Soporte prioritario por WhatsApp</li>
+          </ul>
+          <a class="btn primary big" id="ctaPro" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex">💳 Activar Pro ahora</a>
+          <p class="hint" style="margin:0.5rem 0 0;font-size:0.7rem">Pago seguro vía Mercado Pago · activación inmediata</p>
+        </div>
+        <div class="plan-card">
+          <div class="plan-name">Constructoras<br><small>white-label</small></div>
+          <div class="plan-price">USD 500<span>/año</span></div>
+          <ul>
+            <li>✔ La app completa con <b>TU logo y colores</b></li>
+            <li>✔ Para todo tu equipo de ventas</li>
+            <li>✔ Tu catálogo de formatos y precios propios</li>
+            <li>✔ Capacitación de 2 h a tu equipo</li>
+            <li>✔ Soporte dedicado</li>
+          </ul>
+          <a class="btn" id="ctaWhite" href="#" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem;border:1.5px dashed var(--aqua-line)">
+        <h2 style="font-size:0.95rem">🎁 ¿Cómo consigo más exports gratis?</h2>
+        <p class="hint" style="margin:0">Los exports se renuevan automáticamente cada mes. Si necesitás más antes, escribinos por <a href="https://wa.me/5493790000000" target="_blank" style="color:var(--aqua-bright)">WhatsApp</a> y te activamos un mes de Prueba Pro sin costo — sin compromiso.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h2>🔐 Qué puede hacer cada rol</h2>
+      <p class="hint">La app se adapta a quién la usa: cada área ve y puede hacer solo lo suyo.</p>
+      <div id="permBox" class="table-wrap"></div>
+    </div>
+    <div class="card">
+      <h2>Términos de uso y privacidad</h2>
+      <details>
+        <summary>Términos y condiciones de uso</summary>
+        <p class="hint">ObraAcuática es una herramienta de estimación y proyecto para la construcción de piletas. Los cálculos (materiales, hidráulica, estructura, presupuesto) son <b>orientativos</b>: el proyecto ejecutivo y la seguridad estructural deben ser verificados y firmados por un profesional matriculado. Los precios de referencia tienen fecha de vigencia y varían por zona y proveedor. El usuario es responsable del uso final de la información generada. Las formulaciones de fábrica incluidas en la versión del dueño son confidenciales y de exclusiva propiedad del titular.</p>
+      </details>
+      <details>
+        <summary>Política de privacidad</summary>
+        <p class="hint">ObraAcuática funciona 100% en tu navegador: <b>ningún dato que cargues (proyectos, precios, clientes, avance de obra) sale de tu dispositivo</b>. No hay servidor propio que reciba tu información. Si conectás tu propio motor IA (opcional), tu clave de API se guarda solo en este navegador y viaja únicamente al proveedor que elijas. Si contratás un plan, los datos de pago los procesa el procesador de pagos (Mercado Pago) bajo su política, no nosotros.</p>
+      </details>
+      <details>
+        <summary>Fotografías</summary>
+        <p class="hint">Las fotografías son de autores en Flickr bajo licencia Creative Commons BY (créditos en CREDITS-FOTOS.md). Las ilustraciones son creación propia de ObraAcuática.</p>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>ObraAcuática · Estudio de fabricación y construcción de piletas · Christian Osvaldo Hillkirk Gane · Datos técnicos: manuales propios + estándar del rubro · Verificar cálculo estructural final por ingeniería matriculado.</p>
+</footer>
+
+<script src="data.js?v=4.0"></script>
+<script src="protocols.js?v=4.0"></script>
+<script src="engine.js?v=4.0"></script>
+<script src="planos.js?v=4.0"></script>
+<script src="ilustraciones.js?v=4.0"></script>
+<script src="obra.js?v=4.0"></script>
+<script src="proveedores.js?v=4.0"></script>
+<script src="ia.js?v=4.0"></script>
+<script src="sec-core.js?v=4.0"></script>
+<script src="auth.js?v=4.0"></script>
+<script src="enterprise.js?v=4.0"></script>
+<script src="ui.js?v=4.0"></script>
+</body>
+</html>

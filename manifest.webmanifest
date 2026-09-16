@@ -1,0 +1,24 @@
+{
+  "name": "ObraAcuática — Estudio de Fabricación y Construcción de Piletas",
+  "short_name": "ObraAcuática",
+  "description": "Configurador profesional de piletas: 10 sistemas constructivos, bordes infinitos, hidráulica, filtración, química, protocolos de obra, fábrica, presupuesto con proveedores, planos, seguimiento de obra y asistente IA.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05121C",
+  "theme_color": "#1FB6CD",
+  "lang": "es-AR",
+  "categories": ["productivity", "business", "utilities"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Configurar pileta", "url": "./index.html#config", "description": "Arrancar un proyecto" },
+    { "name": "Presupuesto", "url": "./index.html#budget", "description": "Ver presupuesto actual" },
+    { "name": "Asistente IA", "url": "./index.html#ia", "description": "Preguntarle al experto" }
+  ]
+}
