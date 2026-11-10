@@ -10,6 +10,10 @@ const UI = (() => {
 
   const $ = id => document.getElementById(id);
   const E = Engine;
+  // 🛡️ escapa datos de usuario antes de meterlos en innerHTML (anti XSS)
+  const esc = s => String(s ?? "")
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
   /* ---------- precios editables (localStorage) ---------- */
   function loadPrices() {
@@ -1247,8 +1251,8 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
     const chip = $("userChip");
     if (u) {
       chip.classList.remove("hidden");
-      chip.innerHTML = `<span class="uc-avatar">${u.name.charAt(0).toUpperCase()}</span>
-        <span class="uc-info"><b>${u.name}</b><small>${u.role === "dueño" ? "👑 dueño/admin" : "usuario"}${u.twofaOn ? " · 2FA ✓" : ""}${u.passkeyOn ? " · 🔑" : ""}</small></span>
+      chip.innerHTML = `<span class="uc-avatar">${esc(u.name.charAt(0).toUpperCase())}</span>
+        <span class="uc-info"><b>${esc(u.name)}</b><small>${u.role === "dueño" ? "👑 dueño/admin" : "usuario"}${u.twofaOn ? " · 2FA ✓" : ""}${u.passkeyOn ? " · 🔑" : ""}</small></span>
         <button class="btn mini" id="ucLogout">salir</button>`;
       $("ucLogout").onclick = () => { Auth.logout(); renderAuth(); if (typeof renderFactory === "function") renderFactory(); };
     } else chip.classList.add("hidden");
@@ -1297,7 +1301,7 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
       <div class="card">
         <h2>Tu sesión</h2>
         <div class="kpi-grid">
-          <div class="kpi hl"><div class="k-label">Usuario</div><div class="k-value" style="font-size:1.05rem">${u.name}</div><div class="k-sub">${u.email}</div></div>
+          <div class="kpi hl"><div class="k-label">Usuario</div><div class="k-value" style="font-size:1.05rem">${esc(u.name)}</div><div class="k-sub">${esc(u.email)}</div></div>
           <div class="kpi"><div class="k-label">Rol</div><div class="k-value" style="font-size:1.05rem">${u.role === "dueño" ? "👑 Dueño" : "Usuario"}</div><div class="k-sub">desde ${u.created}</div></div>
           <div class="kpi"><div class="k-label">2FA</div><div class="k-value" style="font-size:1.05rem">${u.twofaOn ? "✅ activo" : "—inactivo"}</div><div class="k-sub">TOTP 30 s</div></div>
           <div class="kpi"><div class="k-label">Passkey</div><div class="k-value" style="font-size:1.05rem">${u.passkeyOn ? "✅ activo" : "—sin"}</div><div class="k-sub">huella / Face ID</div></div>
@@ -1404,8 +1408,8 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
         if (!L.ok) return;
         $("adminBox").innerHTML = `<table><thead><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>Desde</th><th></th></tr></thead>
           <tbody>${L.users.map(x => `<tr>
-            <td><b>${x.name}</b></td><td>${x.email}</td><td>${x.role === "dueño" ? "👑 dueño" : x.role}</td><td>${x.created}</td>
-            <td>${x.email !== u.email ? `<button class="btn mini danger" onclick="UI.adminDel('${x.email}')">quitar</button>` : "(vos)"}</td>
+            <td><b>${esc(x.name)}</b></td><td>${esc(x.email)}</td><td>${x.role === "dueño" ? "👑 dueño" : esc(x.role)}</td><td>${esc(x.created)}</td>
+            <td>${x.email !== u.email ? `<button class="btn mini danger" onclick="UI.adminDel('${esc(x.email)}')">quitar</button>` : "(vos)"}</td>
           </tr>`).join("")}</tbody></table>`;
       };
       renderAdmin();

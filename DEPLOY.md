@@ -13,6 +13,7 @@ Por consola (wrangler), si preferís:
 ```
 npx wrangler pages deploy . --project-name piletalab
 ```
+(con `.assetsignore` activo: no sube docs internos, tests ni zips de backup)
 
 ## Opción B — Netlify
 1. https://app.netlify.com/drop → arrastrá la carpeta → URL live en 10 segundos.

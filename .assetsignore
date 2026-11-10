@@ -1,0 +1,11 @@
+# Cloudflare Pages: no subir nada que no sea la app
+*.md
+*.zip
+_deploys*
+.mimosa
+tests
+tools
+PEDIDOS*
+CORAZON*
+.git
+node_modules
