@@ -111,6 +111,7 @@ const Auth = (() => {
       twofa: null, recovery: [], passkey: null, created: new Date().toISOString().slice(0, 10) };
     list.push(u); saveUsers(list);
     Sec.audit("registro", email + " como " + role);
+    if (typeof Medir !== "undefined") Medir.enviar("registro", { rol: role });   // sin email en eventos
     return { ok: true, user: pub(u), isFirst: role === "dueño" };
   }
 

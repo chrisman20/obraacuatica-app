@@ -30,14 +30,20 @@ const CLIENT_PHASE_DESC = {
    CONFIG del negocio — LO ÚNICO QUE CAMBIÁS ANTES DE PUBLICAR
    ------------------------------------------------------------ */
 const CONFIG = {
-  whatsapp: "5493790000000",   // ← CAMBIAR por el real antes del deploy
+  whatsapp: "5493790000000",   // ← CAMBIAR por el real antes del deploy (bandeja del dueño)
   marca: "ObraAcuática",
   marcaCorta: "OA",
   dominio: "obracuatica.com",
-  mpLink: "https://link.mercadopago.com.ar/obracuatica",
+  mpLink: "",                  // ← link de pago real de Mercado Pago (vacío = checkout SIMULADO)
+  pagos_activos: false,        // ← true SOLO con link de MP real verificado (regla 21)
   precioPro: "USD 15/mes",
   precioWhiteLabel: "USD 500/año",
-  freeExportsMes: 3
+  freeExportsMes: 3,
+  analytics: {                 // ← credenciales de instrumentación (vacías = inactivo por diseño)
+    posthog: "",
+    sentry: "",
+    turnstileSite: ""
+  }
 };
 
 /* ------------------------------------------------------------
@@ -56,10 +62,17 @@ const Freemium = {
   },
   remaining() { return CONFIG.freeExportsMes - this.count(); },
   isPro() {
+    // delega en el circuito de cobro (Cobro), con fallback legacy (regla 18)
+    if (typeof Cobro !== "undefined") return Cobro.esPro();
     try { return JSON.parse(localStorage.getItem("piletalab_pro") || "false"); }
     catch (e) { return false; }
   },
-  setPro(v) { localStorage.setItem("piletalab_pro", JSON.stringify(v)); },
+  setPro(v) {
+    // compat: escribe la clave vieja y el nuevo estado de suscripción
+    localStorage.setItem("piletalab_pro", JSON.stringify(!!v));
+    if (v && typeof Cobro !== "undefined") Cobro.activar("pro", "manual");
+    if (!v && typeof Cobro !== "undefined") Cobro.desactivar();
+  },
   canExport() {
     if (this.isPro()) return { ok: true, pro: true };
     if (this.remaining() > 0) return { ok: true, pro: false, remaining: this.remaining() };
@@ -78,7 +91,7 @@ const Freemium = {
 
 /* Fotos reales por tipo (CC descargadas localmente — ver CREDITS-FOTOS.md).
    ?v= para cache-busting: cada release se bump junto con SW. */
-const IMG_V = "?v=4.0";
+const IMG_V = "?v=4.1";
 const PHOTOS = {
   hero: "img/hero.jpg" + IMG_V,
   arena: "img/arena.jpg" + IMG_V,

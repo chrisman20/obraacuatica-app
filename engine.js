@@ -77,6 +77,16 @@ const Engine = (() => {
 
     // ajustes por tipo
     if (tdef.natural) { cfg.filter = "bio"; }
+
+    // honestidad del presupuesto (regla 19): los num() con fallback silencioso
+    // quedan marcados para que la UI avise — jamás un número que el usuario no cargó
+    cfg.entradasInvalidas = ["fLen", "fWidth", "fDepthMin", "fDepthMax", "fSolW", "fWaste", "fBoxM2", "fDeckW"]
+      .filter(id => {
+        const raw = (document.getElementById(id) || {}).value;
+        return raw != null && String(raw).trim() !== "" ? isNaN(parseFloat(raw)) : raw === "";
+      })
+      .map(id => "un campo numérico");
+    if (!cfg.entradasInvalidas.length) delete cfg.entradasInvalidas;
     return cfg;
   }
 

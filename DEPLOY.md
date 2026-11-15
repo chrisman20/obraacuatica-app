@@ -1,19 +1,19 @@
-# Cómo subir PiletaLab a tu dominio
+# Cómo subir ObraAcuática a tu dominio
 
-La app es **100% estática** (HTML + JS + CSS + fotos, sin backend, sin build). Se sube entera tal cual está la carpeta. Con HTTPS el dominio desbloquea además las PWA (instalable en el celular) y las passkeys biométricas.
+La app es **100% estática en el navegador** (HTML + JS + CSS + fotos, sin build) con un backend mínimo OPCIONAL en `functions/` (solo cobro y health — sin datos de usuarios). Se sube entera tal cual está la carpeta. Con HTTPS el dominio desbloquea además las PWA (instalable en el celular) y las passkeys biométricas.
 
 ## Opción A — Cloudflare Pages (recomendada; ya usás Cloudflare para apicuspartner.com)
 
 1. Entrá a https://dash.cloudflare.com → Workers & Pages → Create application → Pages → **Upload assets** (direct upload, sin git).
 2. Arrastrá TODO el contenido de esta carpeta (index.html, los .js, styles.css, img/, manifest, sw.js, icon.svg…).
-3. Deploy. Te da una URL `piletalab-xxx.pages.dev` que YA funciona.
+3. Deploy. Te da una URL `obracuatica-xxx.pages.dev` que YA funciona.
 4. En tu dominio: Custom domains → Add → `pileta.tudominio.com` → listo (HTTPS automático).
 
 Por consola (wrangler), si preferís:
 ```
-npx wrangler pages deploy . --project-name piletalab
+npx wrangler pages deploy . --project-name obracuatica
 ```
-(con `.assetsignore` activo: no sube docs internos, tests ni zips de backup)
+(con `.assetsignore` activo: no sube docs internos, tests ni zips; la carpeta `functions/` se detecta sola y publica /api/health y el webhook de cobro — sin secrets de MP responden 503 SIMULADO_INACTIVO, proveedor inactivo por diseño)
 
 ## Opción B — Netlify
 1. https://app.netlify.com/drop → arrastrá la carpeta → URL live en 10 segundos.
@@ -21,7 +21,7 @@ npx wrangler pages deploy . --project-name piletalab
 
 ## Opción C — GitHub Pages
 1. Repo nuevo → subí los archivos → Settings → Pages → Branch: main → save.
-2. URL: `usuario.github.io/piletalab` (se puede apuntar subdominio propio).
+2. URL: `usuario.github.io/obracuatica` (se puede apuntar subdominio propio).
 
 ## Checklist post-deploy
 - [ ] Abrí el sitio en el CELULAR → menú del navegador → "Instalar aplicación" (PWA ✓)

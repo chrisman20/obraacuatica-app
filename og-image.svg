@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs>
+  <linearGradient id="mar" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#05121C"/><stop offset="0.55" stop-color="#07293E"/><stop offset="1" stop-color="#0A3D5C"/>
+  </linearGradient>
+  <linearGradient id="agua" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#4FD8EC"/><stop offset="1" stop-color="#1FB6CD"/>
+  </linearGradient>
+  <linearGradient id="veta" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#D8B36A"/><stop offset="1" stop-color="#E8DCC4"/>
+  </linearGradient>
+</defs>
+<rect width="1200" height="630" fill="url(#mar)"/>
+<ellipse cx="240" cy="80" rx="420" ry="180" fill="#1FB6CD" opacity="0.10"/>
+<ellipse cx="1000" cy="120" rx="380" ry="160" fill="#4FD8EC" opacity="0.08"/>
+<ellipse cx="620" cy="600" rx="500" ry="200" fill="#1FB6CD" opacity="0.06"/>
+<path d="M0,470 C150,440 260,500 420,478 C580,456 690,502 850,486 C1010,470 1100,500 1200,484 L1200,630 L0,630 Z" fill="#1FB6CD" opacity="0.10"/>
+<path d="M0,505 C170,478 300,530 470,508 C640,486 760,536 930,518 C1080,502 1160,528 1200,522 L1200,630 L0,630 Z" fill="#1FB6CD" opacity="0.16"/>
+<g transform="translate(760,150)">
+  <rect x="0" y="0" width="360" height="220" rx="26" fill="#0A2A40" stroke="#1FB6CD" stroke-width="3"/>
+  <rect x="14" y="14" width="332" height="192" rx="18" fill="url(#agua)" opacity="0.85"/>
+  <path d="M20,84 C90,66 160,96 230,80 C290,66 330,84 340,78 L340,196 Q340,200 330,200 L24,200 Q14,200 14,190 Z" fill="#4FD8EC" opacity="0.30"/>
+  <path d="M14,120 C90,104 170,132 250,114 C300,102 336,116 346,110 L346,196 Q346,200 336,200 L14,200 Z" fill="#4FD8EC" opacity="0.25"/>
+  <g stroke="#E8DCC4" stroke-width="5" stroke-linecap="round" opacity="0.75">
+    <line x1="60" y1="150" x2="60" y2="168"/><line x1="100" y1="162" x2="100" y2="184"/>
+    <line x1="140" y1="150" x2="140" y2="168"/><line x1="180" y1="162" x2="180" y2="184"/>
+    <line x1="220" y1="150" x2="220" y2="168"/>
+  </g>
+  <path d="M-10,-10 L370,-10" stroke="url(#veta)" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="-10" cy="-10" r="6" fill="#D8B36A"/><circle cx="370" cy="-10" r="6" fill="#D8B36A"/>
+  <g stroke="#E8DCC4" stroke-width="5" stroke-linecap="round" opacity="0.9">
+    <line x1="336" y1="40" x2="336" y2="112"/><line x1="336" y1="52" x2="314" y2="52"/>
+    <line x1="336" y1="72" x2="314" y2="72"/><line x1="336" y1="92" x2="314" y2="92"/>
+  </g>
+</g>
+<g transform="translate(90,140)">
+  <path d="M0,-44 C26,-8 44,10 44,32 A44,44 0 1,1 -44,32 C-44,10 -26,-8 0,-44 Z" fill="#1FB6CD"/>
+  <path d="M-24,34 A24,24 0 0,0 24,34" fill="none" stroke="#05121C" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="0" cy="18" r="6" fill="#05121C"/>
+</g>
+<text x="90" y="290" font-family="Arial, Helvetica, sans-serif" font-size="78" font-weight="800" fill="#E2EFF6" letter-spacing="1">ObraAcu&#225;tica</text>
+<rect x="92" y="312" width="380" height="4" rx="2" fill="url(#veta)"/>
+<text x="92" y="352" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="600" fill="#84A9BB">Estudio de fabricaci&#243;n y construcci&#243;n de piletas</text>
+<g font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="600">
+  <rect x="92" y="390" width="296" height="44" rx="22" fill="#0A2A40" stroke="#1FB6CD" stroke-opacity="0.35"/>
+  <text x="240" y="418" fill="#4FD8EC" text-anchor="middle">10 sistemas constructivos</text>
+  <rect x="404" y="390" width="180" height="44" rx="22" fill="#0A2A40" stroke="#1FB6CD" stroke-opacity="0.35"/>
+  <text x="494" y="418" fill="#4FD8EC" text-anchor="middle">planos SVG</text>
+  <rect x="600" y="390" width="248" height="44" rx="22" fill="#0A2A40" stroke="#1FB6CD" stroke-opacity="0.35"/>
+  <text x="724" y="418" fill="#4FD8EC" text-anchor="middle">presupuesto en 2 min</text>
+</g>
+<text x="92" y="500" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="500" fill="#84A9BB">obracuatica.com &#183; de la red Apicus</text>
+</svg>

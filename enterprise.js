@@ -562,6 +562,8 @@ const Enterprise = (() => {
      11 · TOAST helper
      ============================================================ */
   function toast(msg) {
+    // delega en el sistema propio con aria-live (Dialogos), si está cargado
+    if (typeof Dialogos !== "undefined") { Dialogos.toast(msg); return; }
     const n = document.createElement("div");
     n.className = "warn";
     n.style.cssText = "position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;padding:0.7rem 1.2rem;font-size:0.85rem";

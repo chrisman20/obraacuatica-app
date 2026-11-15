@@ -6,7 +6,16 @@
 <title>ObraAcuática — Estudio de Fabricación y Construcción de Piletas</title>
 <meta name="description" content="Configurador profesional de piletas: arena estilo Bali, construccion tradicional, prefabricadas GRC de fabrica, naturales y borde infinito. Calculo de geometria, materiales, hidraulica, filtracion, quimica del agua, protocolos de obra y presupuesto.">
 <meta name="theme-color" content="#1FB6CD">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'">
+<!-- Carta de presentación en WhatsApp/redes (estándar §7.3: app sin og:image no se publica) -->
+<meta property="og:title" content="ObraAcuática — Estudio de Fabricación y Construcción de Piletas">
+<meta property="og:description" content="Configurá, calculá y presupuestá tu pileta en 2 minutos: 10 sistemas constructivos, planos SVG, hidráulica, química, protocolos de obra y asistente IA.">
+<meta property="og:image" content="og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="og-image.png">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -19,7 +28,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=4.0">
+<link rel="stylesheet" href="styles.css?v=4.1">
 </head>
 <body data-app="obracuatica">
 
@@ -847,7 +856,7 @@
             <li>✔ Comparador A/B de configuraciones</li>
             <li>✔ Soporte prioritario por WhatsApp</li>
           </ul>
-          <a class="btn primary big" id="ctaPro" href="#" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex">💳 Activar Pro ahora</a>
+          <button class="btn primary big" id="ctaPro" type="button">💳 Activar Pro ahora</button>
           <p class="hint" style="margin:0.5rem 0 0;font-size:0.7rem">Pago seguro vía Mercado Pago · activación inmediata</p>
         </div>
         <div class="plan-card">
@@ -863,9 +872,10 @@
           <a class="btn" id="ctaWhite" href="#" target="_blank" rel="noopener">Consultar por WhatsApp</a>
         </div>
       </div>
+      <div id="cobroGestion" style="margin-bottom:1rem"></div>
       <div class="card" style="margin-top:1rem;border:1.5px dashed var(--aqua-line)">
         <h2 style="font-size:0.95rem">🎁 ¿Cómo consigo más exports gratis?</h2>
-        <p class="hint" style="margin:0">Los exports se renuevan automáticamente cada mes. Si necesitás más antes, escribinos por <a href="https://wa.me/5493790000000" target="_blank" style="color:var(--aqua-bright)">WhatsApp</a> y te activamos un mes de Prueba Pro sin costo — sin compromiso.</p>
+        <p class="hint" style="margin:0">Los exports se renuevan automáticamente cada mes. Si necesitás más antes, escribinos por <a id="waPruebaPro" href="#" target="_blank" rel="noopener" style="color:var(--aqua-bright)">WhatsApp</a> y te activamos un mes de Prueba Pro sin costo — sin compromiso.</p>
       </div>
     </div>
     <div class="card">
@@ -894,19 +904,27 @@
 
 <footer>
   <p>ObraAcuática · Estudio de fabricación y construcción de piletas · Christian Osvaldo Hillkirk Gane · Datos técnicos: manuales propios + estándar del rubro · Verificar cálculo estructural final por ingeniería matriculado.</p>
+  <p class="red-apicus">de la red Apicus —
+    <a href="https://obracuatica.pages.dev/?ref=red" title="Estás en ObraAcuática">ObraAcuática</a> ·
+    <a href="https://turno-blindado.pages.dev/?ref=red" target="_blank" rel="noopener noreferrer" title="Turnos online con agenda propia">Turno Blindado</a> ·
+    <a href="https://apicuspartner.com/?ref=red" target="_blank" rel="noopener noreferrer" title="Portafolio editorial Apicus Partners">Apicus Partners</a>
+  </p>
 </footer>
 
-<script src="data.js?v=4.0"></script>
-<script src="protocols.js?v=4.0"></script>
-<script src="engine.js?v=4.0"></script>
-<script src="planos.js?v=4.0"></script>
-<script src="ilustraciones.js?v=4.0"></script>
-<script src="obra.js?v=4.0"></script>
-<script src="proveedores.js?v=4.0"></script>
-<script src="ia.js?v=4.0"></script>
-<script src="sec-core.js?v=4.0"></script>
-<script src="auth.js?v=4.0"></script>
-<script src="enterprise.js?v=4.0"></script>
-<script src="ui.js?v=4.0"></script>
+<script src="data.js?v=4.1"></script>
+<script src="dialogos.js?v=4.1"></script>
+<script src="medir.js?v=4.1"></script>
+<script src="cobro.js?v=4.1"></script>
+<script src="protocols.js?v=4.1"></script>
+<script src="engine.js?v=4.1"></script>
+<script src="planos.js?v=4.1"></script>
+<script src="ilustraciones.js?v=4.1"></script>
+<script src="obra.js?v=4.1"></script>
+<script src="proveedores.js?v=4.1"></script>
+<script src="ia.js?v=4.1"></script>
+<script src="sec-core.js?v=4.1"></script>
+<script src="auth.js?v=4.1"></script>
+<script src="enterprise.js?v=4.1"></script>
+<script src="ui.js?v=4.1"></script>
 </body>
 </html>

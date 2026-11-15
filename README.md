@@ -1,8 +1,8 @@
-# PiletaLab — Estudio de Fabricación y Construcción de Piletas
+# ObraAcuática — Estudio de Fabricación y Construcción de Piletas
 
-App web **PWA instalable** (100% estática, sin dependencias ni build, funciona offline) que funciona como especialista de proyecto para fabricar y construir piletas — con **3 áreas por rol (Cliente · Profesional · Proveedor)**, fotografía real, landing premium, seguridad grado bancario y asistente IA de doble motor.
+App web **PWA instalable** (100% en tu navegador: estática, sin build, funciona offline) que funciona como especialista de proyecto para fabricar y construir piletas — con **3 áreas por rol (Cliente · Profesional · Proveedor)**, fotografía real, landing premium, seguridad grado bancario y asistente IA de doble motor.
 
-**Estado: v2.7 — ROBUSTA Y COMPLETA.** Incluye color de agua por revestimiento con maqueta SVG, matriz de permisos por rol con `can()`, comparador A/B, balance térmico, verificación de flotación, IA con streaming + memoria, export a Odoo, PWA completa con iconos PNG. Pendiente solo lo comercial: dominio + deploy (DEPLOY.md) + WhatsApp real en `CONFIG.whatsapp` (data.js) + fotos propias de tus obras reemplazando `img/`.
+**Estado: v4.1 — pase de madurez 15/11/2026.** Incluye color de agua por revestimiento con maqueta SVG, matriz de permisos por rol con `can()`, comparador A/B, balance térmico, verificación de flotación, IA con streaming + memoria, export a Odoo, PWA completa con iconos PNG. Pendiente del dueño (bandeja): link real de Mercado Pago + `pagos_activos: true` en data.js, WhatsApp real en `CONFIG.whatsapp`, credenciales PostHog/Sentry/Turnstile y deploy a dominio (ver PENDIENTES-DEL-DUENO.md).
 
 **Cómo usarla:** abrir `index.html` doble click, o servirla (`python -m http.server`). En dominio HTTPS se vuelve instalable en el celular (PWA) con las passkeys activas. Guía de publicación: `DEPLOY.md`.
 
@@ -38,17 +38,39 @@ Cada tipo de pileta tiene su **ilustración arquitectónica propia** (viñeta SV
 ## Arquitectura
 
 ```
-piletalab/
-├── index.html      → estructura y 8 pestañas
-├── styles.css      → tema agua profunda (dark aqua)
-├── data.js         → tipos, bordes, copings, decks, innovaciones, filtración, química, precios base
+obracuatica/
+├── index.html      → estructura y 9 pestañas + landing + red Apicus
+├── styles.css      → tema agua profunda (dark aqua) + vidrio de diálogos
+├── data.js         → CONFIG del negocio, freemium, tipos, bordes, química, precios base
+├── dialogos.js     → toasts + modales propios (3 salidas: ✕ / fondo / Escape) — cero alert nativo
+├── cobro.js        → circuito de cobro (regla 21): PLANS, suscripción, checkout SIMULADO/MP
+├── medir.js        → PostHog/Sentry/Turnstile inactivos por diseño (sin credencial = sin red)
 ├── protocols.js    → protocolos de obra (11 sistemas) + fórmulas de fábrica + guía de moldes
 ├── engine.js       → motor puro (geometría, hidráulica, materiales, química, presupuesto)
 ├── planos.js       → generador de planos SVG (planta + axonométrica + 2 cortes, en vivo)
 ├── ilustraciones.js→ viñetas arquitectónicas SVG animadas por tipo de pileta
 ├── obra.js         → seguimiento de obra + cronograma Gantt + informe cliente + exports Excel/Word/MD
+├── functions/      → backend mínimo opcional (Cloudflare Pages): /api/health + webhook MP firmado
+├── og-image.png    → carta de WhatsApp 1200×630 (regenerar con 99-HERRAMIENTAS/img-tools/og-obracuatica.py)
+├── tests/          → gates: smoke-seguridad.js + smoke-ui.js (node tests/…)
 └── ui.js           → render, tabs, chips, hero, localStorage de precios, CSV, planos
 ```
+
+## Red Apicus (regla 22)
+Nivel N1 cumplido: bloque "de la red Apicus" en el footer con `?ref=red`.
+**VECINAS DE RED declaradas:** `obracuatica ↔ turno-blindado` (N1→N2: el profesional
+que presupuesta su obra en ObraAcuática agenda sus visitas/mediciones en Turno
+Blindado — flujo: link con `?ref=red`, identidad compartida por email verificado
+en fase N2) · `obracuatica ↔ apicuspartner.com` (N1: escaparate comercial del
+estudio). El entrelazamiento va DESPUÉS del corazón verde — no hay dependencia dura.
+
+## Cobro (regla 21)
+Gratis es un plan de la tabla (`cobro.js` PLANS), no la ausencia del sistema:
+pricing real en la pestaña 9, suscripción con expiración + migración de usuario
+viejo, checkout SIMULADO honesto mientras `CONFIG.pagos_activos: false`, y
+upgrade que se enciende SOLO con link real de MP + flag (jamás un refactor).
+El plan se activa client-side solo en modo simulado; con backend (functions/)
+el webhook firmado activa server-side. Gate: `node tests/smoke-seguridad.js`.
 
 Validado por navegador: la geometría del caso 4x8 reproduce el Excel de referencia (volumen 32,6 m³ exacto, 32 cajas de venecita, 9 bolsas de adhesivo).
 

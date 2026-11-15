@@ -41,6 +41,9 @@ const UI = (() => {
       if (!btn) return;
       document.querySelectorAll("#mainTabs button").forEach(b => b.classList.toggle("active", b === btn));
       document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("active", p.id === "tab-" + btn.dataset.tab));
+      // el circuito de cobro se refresca SIEMPRE al entrar a Planes (regla 21:
+      // el panel nunca muestra un plan que ya no es — ni oculta el que sí es)
+      if (btn.dataset.tab === "planes" && typeof Cobro !== "undefined") Cobro.renderGestion();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
     $("goResults").addEventListener("click", () => {
@@ -609,27 +612,23 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
       }
       const free = Freemium.canExport();
       if (!free.ok) {
-        // se acabaron los gratis del mes → mostrar upsell Pro
-        const el = document.createElement("div");
-        el.className = "prov-modal";
-        el.innerHTML = `<div class="prov-box" style="max-width:420px;text-align:center">
-          <h3>🎁 Usaste tus ${CONFIG.freeExportsMes} exports gratis del mes</h3>
-          <p class="hint" style="margin:0.8rem 0">Con el <b>Plan Pro</b> (${CONFIG.precioPro}) exportás ilimitado:</p>
-          <ul style="list-style:none;text-align:left;font-size:0.85rem;line-height:1.8;padding:0 1.5rem">
-            <li>📊 Excel · 📝 Word · 🗂 MD · ⚙ CSV · 📦 Odoo · 🖨 PDF</li>
-            <li>📐 Planos SVG descargables sin marca</li>
-            <li>📥 Informe de cliente sin marca de agua</li>
-            <li>🏗️ Seguimiento de obra completo</li>
-          </ul>
-          <a class="btn primary" href="${CONFIG.mpLink}" target="_blank" rel="noopener" style="margin-top:1rem;display:inline-flex;text-decoration:none">💳 Activar Pro — ${CONFIG.precioPro}</a>
-          <p class="hint" style="margin:0.7rem 0 0">O escribinos: <a href="https://wa.me/${CONFIG.whatsapp}" target="_blank" style="color:var(--aqua-bright)">WhatsApp</a></p>
-        </div>`;
-        document.body.appendChild(el);
-        el.addEventListener("click", e => { if (e.target === el) el.remove(); });
+        // se acabaron los gratis del mes → upsell Pro por diálogo propio (3 salidas)
+        Dialogos.info({
+          titulo: "🎁 Usaste tus " + CONFIG.freeExportsMes + " exports gratis del mes",
+          html:
+            '<p class="dlg-text">Con el <b>Plan Pro</b> (' + CONFIG.precioPro + ') exportás ilimitado:</p>' +
+            '<p class="dlg-text" style="font-size:.85rem">📊 Excel · 📝 Word · 🗂 MD · ⚙ CSV · 📦 Odoo · 🖨 PDF<br>📐 Planos SVG sin marca · 📥 Informe de cliente limpio</p>',
+          primario: true,
+          extra: [
+            { texto: "💳 Activar Pro — " + CONFIG.precioPro, clase: "btn primary", fn: () => Cobro.checkout("pro") },
+            { texto: "💬 WhatsApp", clase: "btn", fn: () => window.open("https://wa.me/" + CONFIG.whatsapp, "_blank", "noopener") }
+          ]
+        });
         return;
       }
       fn();
       Freemium.consumeExport();
+      if (typeof Medir !== "undefined" && Freemium.count() === 1) Medir.enviar("aha", { donde: "primer-export" });
       if (!free.pro && free.remaining <= 2) {
         Enterprise.toast(`🎁 Te quedan ${free.remaining} exports gratis este mes — Plan Pro ilimitado`);
       }
@@ -675,7 +674,9 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
 
     // warns en config
     const w = $("geoWarn");
-    if (geo.warns.length) { w.innerHTML = geo.warns.map(x => "⚠ " + x).join("<br>"); w.classList.remove("hidden"); }
+    const avisos = [...geo.warns.map(x => "⚠ " + x)];
+    if (cfg.entradasInvalidas) avisos.push("⚠ Un campo numérico quedó vacío o inválido: se calculó con el valor por defecto — revisalo antes de confiar en el presupuesto.");
+    if (avisos.length) { w.innerHTML = avisos.join("<br>"); w.classList.remove("hidden"); }
     else w.classList.add("hidden");
 
     // infinity box + descripción de borde visible según tipo
@@ -1150,8 +1151,9 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
       c.addEventListener("click", () => sendIA(c.textContent)));
 
     // limpiar conversación
-    $("iaClear").addEventListener("click", () => {
-      if (!confirm("¿Borrar toda la conversación?")) return;
+    $("iaClear").addEventListener("click", async () => {
+      const ok = await Dialogos.confirmar({ titulo: "Borrar conversación", texto: "¿Borrar toda la conversación con el asistente?", btnOk: "Sí, borrar", peligro: true });
+      if (!ok) return;
       chatHistory = [];
       localStorage.removeItem(CHAT_KEY);
       $("chatBox").innerHTML = "";
@@ -1419,9 +1421,19 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
         const b = Auth.exportAll();
         if (!b.ok) return;
         // 🛡️ backup CIFRADO AES-256-GCM: sin la passphrase es un ladrillo
-        const pass1 = prompt("🔐 Passphrase del backup (mínimo 10 caracteres — sin ella NO se puede restaurar):");
+        const resp = await Dialogos.pedir({
+          titulo: "🔐 Passphrase del backup",
+          texto: "Mínimo 10 caracteres — sin ella NO se puede restaurar.",
+          btnOk: "Descargar backup cifrado",
+          campos: [
+            { label: "Passphrase", tipo: "password", ph: "mínimo 10 caracteres" },
+            { label: "Repetí la passphrase", tipo: "password", ph: "igual a la anterior" }
+          ]
+        });
+        if (!resp) return;
+        const pass1 = resp[0];
         if (!pass1 || pass1.length < 10) { $("adMsg").textContent = "⚠️ Passphrase demasiado corta: backup cancelado."; return; }
-        if (prompt("Repetí la passphrase para confirmar:") !== pass1) { $("adMsg").textContent = "⚠️ No coinciden: backup cancelado."; return; }
+        if (resp[1] !== pass1) { $("adMsg").textContent = "⚠️ No coinciden: backup cancelado."; return; }
         const enc = await Sec.aesEncrypt(b, pass1);
         const blob = new Blob([JSON.stringify(enc, null, 1)], { type: "application/json" });
         const a = document.createElement("a");
@@ -1436,7 +1448,14 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
         if (!f) return;
         try {
           const payload = JSON.parse(await f.text());
-          const pass = prompt("🔐 Passphrase del backup:");
+          const resp = await Dialogos.pedir({
+            titulo: "🔐 Restaurar backup",
+            texto: "Ingresá la passphrase con la que se cifró el archivo.",
+            btnOk: "Restaurar",
+            campos: [{ label: "Passphrase", tipo: "password", ph: "passphrase del backup" }]
+          });
+          if (!resp) { e.target.value = ""; return; }
+          const pass = resp[0];
           const data = await Sec.aesDecrypt(payload, pass);   // GCM autentica: clave mala = error
           const r = Auth.importAll(JSON.stringify(data.data));
           Sec.audit("backup_importado", "ok");
@@ -1545,9 +1564,18 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
 
     // CTAs comerciales desde CONFIG (un solo lugar: data.js)
     const wa = (txt) => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(txt)}`;
-    // Pro: directo a Mercado Pago (cambia CONFIG.mpLink por tu link real)
-    if ($("ctaPro")) $("ctaPro").href = CONFIG.mpLink || wa("Quiero el plan Pro de ObraAcuática");
+    // Pro: el upgrade pasa por el circuito de cobro (Cobro.checkout — regla 21),
+    // nunca un link crudo colgado: el diálogo muestra el estado real del circuito.
+    const ctaPro = $("ctaPro");
+    if (ctaPro) {
+      ctaPro.removeAttribute("href");
+      ctaPro.style.cursor = "pointer";
+      ctaPro.addEventListener("click", e => { e.preventDefault(); Cobro.checkout("pro"); });
+    }
     if ($("ctaWhite")) $("ctaWhite").href = wa("Quiero ObraAcuática white-label para mi constructora");
+    // WhatsApp de la tarjeta de Prueba Pro (antes hardcodeado en el HTML)
+    const waPrueba = document.getElementById("waPruebaPro");
+    if (waPrueba) waPrueba.href = wa("Necesito más exports — Prueba Pro de ObraAcuática");
 
     // PWA: registrar service worker (solo en http/https)
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
@@ -1574,7 +1602,17 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
       <thead><tr><th>Función</th><th>👤 Cliente</th><th>🏗️ Profesional</th><th>🚚 Proveedor</th></tr></thead>
       <tbody>${ROLE_PERMS.features.map(r => `<tr><td>${r.f}</td><td style="text-align:center">${r.c}</td><td style="text-align:center">${r.p}</td><td style="text-align:center">${r.v}</td></tr>`).join("")}</tbody></table>
       <p class="hint" style="margin-top:0.5rem">${ROLE_PERMS.nota}</p>`;
+    // circuito de cobro: gestión del plan + aviso de vencimiento (regla 21)
+    if (typeof Cobro !== "undefined") {
+      Cobro.avisarSiVencida();
+      Cobro.renderGestion();
+    }
   }
 
-  return { recalc, getPrices: () => PRICES, getIAMode: () => (typeof IA !== "undefined" ? (IA.loadSettings().mode || "auto") : "auto"), adminDel, renderAuth };
+  /* ---------- render del bloque de gestión de plan (Planes) ---------- */
+  function renderPlanes() {
+    if (typeof Cobro !== "undefined") Cobro.renderGestion();
+  }
+
+  return { recalc, getPrices: () => PRICES, getIAMode: () => (typeof IA !== "undefined" ? (IA.loadSettings().mode || "auto") : "auto"), adminDel, renderAuth, renderPlanes };
 })();

@@ -1,2 +1,7 @@
 .mimosa/
 *.log
+data/
+.env
+*.local
+deploy.zip
+*.zip

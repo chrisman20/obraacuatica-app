@@ -74,11 +74,21 @@ const Proveedores = (() => {
     });
   }
 
-  function addLocal(catId) {
-    const name = prompt("Nombre del proveedor local (corralón, ferretería, casa de piscinas…):");
-    if (!name) return;
-    const km = prompt("¿A cuántos km de tu obra? (número — dejá vacío si es online/envío):", "5");
-    const phone = prompt("WhatsApp/teléfono (opcional, con característica — ej: 3794151234567):", "");
+  async function addLocal(catId) {
+    const resp = await Dialogos.pedir({
+      titulo: "➕ Proveedor local",
+      texto: "Corralón, ferretería o casa de piscinas de tu zona.",
+      btnOk: "Agregar al directorio",
+      campos: [
+        { label: "Nombre", ph: "Corralón El Puente" },
+        { label: "Km de tu obra (vacío = envío/online)", tipo: "number", ph: "5", req: false },
+        { label: "WhatsApp/teléfono (opcional, con característica)", ph: "3794151234567", req: false }
+      ]
+    });
+    if (!resp) return;
+    const name = resp[0];
+    const km = resp[1];
+    const phone = resp[2];
     const zone = loadZone();
     const dir = loadDir();
     dir.push({ cat: catId, name, km: km === "" ? null : parseFloat(km), phone: phone || "", city: zone.city || "", added: new Date().toISOString().slice(0, 10) });

@@ -1,4 +1,4 @@
-# SECURITY.md — PiletaLab
+# SECURITY.md — ObraAcuática
 
 Protocolo de seguridad implementado (v2.2) según `99-HERRAMIENTAS/seguridad-apps/SECURITY-PROTOCOL.md`.
 
