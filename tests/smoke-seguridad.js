@@ -101,11 +101,11 @@ check("suscripcion con expiracion + migracion legacy", cobro.includes("KEY_LEGAC
 // 8) PWA + cache-busting (usuario viejo, regla 18)
 const sw = read("sw.js");
 const manifest = read("manifest.webmanifest");
-check("SW versionado v4.1", sw.includes("obracuatica-v4.1"));
+check("SW versionado (cache bump)", /obracuatica-v\d+\.\d+/.test(sw));
 check("SW cachea el shell completo (incluye dialogos/medir/cobro)", sw.includes("./dialogos.js") && sw.includes("./medir.js" ) && sw.includes("./cobro.js"));
 check("manifest standalone", manifest.includes('"display": "standalone"'));
 check("manifest iconos 192/512 + maskable + svg", manifest.includes("icon-192.png") && manifest.includes("icon-512.png") && manifest.includes("purpose\": \"maskable"));
-check("index versiona los scripts ?v=4.1 (coherente con SW)", /cobro\.js\?v=4\.1/.test(index) && /dialogos\.js\?v=4\.1/.test(index));
+check("index versiona los scripts ?v= (coherente con SW)", (()=>{ const m=(read("sw.js").match(/obracuatica-v(\d+\.\d+)/)||[])[1]; return !!m && index.includes("cobro.js?v="+m) && index.includes("dialogos.js?v="+m); })());
 check("theme-color + apple-touch-icon", index.includes("apple-touch-icon.png") && index.includes('name="theme-color"'));
 
 // 9) deploy higiene
@@ -113,8 +113,33 @@ check(".assetsignore presente (deploy por lista)", exists(".assetsignore"));
 check(".gitignore cubre datos locales", read(".gitignore").includes("data/") && read(".gitignore").includes(".env"));
 check("health endpoint presente", read("functions/api/health.js").includes("ok: true"));
 
+// ── TOTE r1 (15/11): P0 cerrados con check permanente ──
+(function(){
+  const ui = read("ui.js");
+  const cobro = read("cobro.js");
+  const planos = read("planos.js");
+  const obra = read("obra.js");
+  const index2 = read("index.html");
+  // P0-1: loadProject restauraba el tipo contra un selector que no existía
+  check("tote-r1 p0-1: loadProject usa .ts-card (el selector .type-card no matcheaba nada)", ui.includes('.ts-card[data-type=') && !ui.includes('.type-card[data-type='));
+  check("tote-r1 p0-1: el tipo viaja en el snapshot guardado y se aplica applyTypePreset", ui.includes("applyTypePreset(pj.type)") && ui.includes("type, snap"));
+  // P0-2: "Ya pagué" jamás activa client-side (regla 21)
+  check("tote-r1 p0-2: Yá pagué no activa (reclamo, no activación)", !cobro.includes('activar(planId, "manual-pendiente")') && cobro.includes("function reclamarPago"));
+  check("tote-r1 p0-2: la activación real es solo canje verificado server-side", cobro.includes('fetch("/api/cobro/canjear"') && cobro.includes('activar(j.plan, "mp-verificado", j.expira)'));
+  check("tote-r1 p0-2: endpoint canjear valida HMAC server-side con TTL", read("functions/api/cobro/canjear.js").includes("tiempoConstante") && read("functions/api/cobro/canjear.js").includes("vencido"));
+  check("tote-r1 p0-2: webhook emite código de canje firmado al aprobar", read("functions/api/cobro/webhook.js").includes("codigo_canje"));
+  // P0-3: lo vendido se entrega — marca de agua condicional REAL
+  check("tote-r1 p0-3: planos con marca condicional (marcaPlano + marcaRequerida)", planos.includes("function marcaPlano") && planos.includes("marcaRequerida"));
+  check("tote-r1 p0-3: obra con pie condicional (pieMarca)", obra.includes("function pieMarca") && (obra.match(/pieMarca\(\)/g) || []).length >= 3);
+  check("tote-r1 p0-3: sin texto fijo de marca en planos (siempre condicional)", !/`[^`]*ObraAcuática \$\{DATA_VERSION\}/.test(planos));
+  // white-label real
+  check("tote-r1 p0-3: white-label implementado (branding aplicable)", cobro.includes("function aplicarBranding") && cobro.includes("obracuatica_branding") && planos.includes("tinte()"));
+})()
+
+// ---------- RESULTADO ----------
+
 if (failures) {
   console.error("\nSMOKE SEGURIDAD: " + failures + " fallo(s). No se publica.");
   process.exit(1);
 }
-console.log("\nSMOKE SEGURIDAD: todo verde (Nivel 1 + auth client-side + cobro regla 21).");
+console.log("\nSMOKE SEGURIDAD: todo verde (Nivel 1 + auth client-side + cobro regla 21 + TOTE r1).");

@@ -79,8 +79,8 @@ check("toda <img> con alt", (() => {
 check("bloque red Apicus con ?ref=red en el footer", /ref=red/.test(index));
 
 // 9) coherencia usuario viejo (regla 18): versiones alineadas
-check("SW v4.1 coherente con index ?v=4.1", read("sw.js").includes("obracuatica-v4.1") && index.includes("dialogos.js?v=4.1"));
-check("IMG_V v4.1 coherente con el SW", read("data.js").includes("?v=4.1") && read("sw.js").includes("?v=4.1"));
+check("SW coherente con index ?v= (regla 18 usuario viejo)", (()=>{ const m=(read("sw.js").match(/obracuatica-v(\d+\.\d+)/)||[])[1]; return !!m && index.includes("dialogos.js?v="+m); })());
+check("IMG_V coherente con el SW", (()=>{ const m=(read("sw.js").match(/obracuatica-v(\d+\.\d+)/)||[])[1]; return !!m && read("data.js").includes("?v="+m); })());
 
 // 10) producto: cero cosas que no llevan a ningún lado (P1-P10)
 check("ctaPro pasa por el circuito de cobro (nunca href=# colgado)", cobro.includes("function checkout") && !index.includes('id="ctaPro" href="#"'));

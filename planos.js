@@ -10,7 +10,20 @@ const Plano = (() => {
 
   const S = 90;                       // px por metro
   const INK = "#22303c";              // línea principal
-  const AQUA = "#1FB6CD";             // agua
+  let AQUA = "#1FB6CD";               // agua (re-branding white-label la recolorea)
+  // color de marca activo: branding white si existe, si no el aqua de la casa
+  function tinte() {
+    if (typeof Cobro !== "undefined" && Cobro.branding && Cobro.branding().color) return Cobro.branding().color;
+    return "#1FB6CD";
+  }
+  function marcaPlano() {
+    // lo vendido se entrega (P0 TOTE r1): la marca solo si el plan la exige
+    const b = (typeof Cobro !== "undefined" && Cobro.branding) ? Cobro.branding() : {};
+    if (b.texto) return { sigla: b.texto.slice(0, 3).toUpperCase(), nombre: b.texto, branding: true };
+    if (typeof Cobro !== "undefined" && !Cobro.marcaRequerida()) return null;
+    return { sigla: "OA", nombre: "OBRA ACUÁTICA · estudio de piletas", branding: false };
+}
+
   const SAND = "#d9c9a3";             // coping
   const DECKC = "#c9b48a";            // deck
   const MUTE = "#6b7c8a";             // cotas y textos secundarios
@@ -51,9 +64,13 @@ const Plano = (() => {
       <line x1="${cx}" y1="${cy + 27}" x2="${cx + cw}" y2="${cy + 27}" stroke="${INK}" stroke-width="1"/>
       <line x1="${cx}" y1="${cy + 57}" x2="${cx + cw}" y2="${cy + 57}" stroke="${INK}" stroke-width="0.8"/>
       <line x1="${cx + 56}" y1="${cy}" x2="${cx + 56}" y2="${cy + 27}" stroke="${INK}" stroke-width="0.8"/>
-      <rect x="${cx + 8}" y="${cy + 5.5}" width="17" height="17" rx="4" fill="${AQUA}"/>
-      <text x="${cx + 16.5}" y="${cy + 18}" font-family="Segoe UI" font-size="10" font-weight="800" fill="#041820" text-anchor="middle">OA</text>
-      <text x="${cx + 64}" y="${cy + 18}" font-family="Segoe UI" font-size="11.5" font-weight="800" fill="${INK}">OBRA ACUÁTICA · estudio de piletas</text>
+      ${(() => {
+        const m = marcaPlano();
+        if (!m) return "";
+        return '<rect x="' + (cx + 8) + '" y="' + (cy + 5.5) + '" width="17" height="17" rx="4" fill="' + tinte() + '"/>' +
+               '<text x="' + (cx + 16.5) + '" y="' + (cy + 18) + '" font-family="Segoe UI" font-size="10" font-weight="800" fill="#041820" text-anchor="middle">' + m.sigla + '</text>' +
+               '<text x="' + (cx + 64) + '" y="' + (cy + 18) + '" font-family="Segoe UI" font-size="11.5" font-weight="800" fill="' + INK + '">' + m.nombre + '</text>';
+      })()}
       <text x="${cx + 10}" y="${cy + 41}" font-family="Segoe UI" font-size="9.5" fill="${MUTE}">${cfg.tdef.name} · ${fmt(cfg.L)}×${fmt(cfg.W)} m · ${BORDERS[cfg.borderType].name.split("(")[0].trim()}</text>
       <text x="${cx + 10}" y="${cy + 52}" font-family="Segoe UI" font-size="9" fill="${MUTE}">volumen ${fmt(SHEET.vol)} m³ · ${FINISHES[cfg.finish].name.split("(")[0].trim()} · ${d}</text>
       <text x="${cx + 10}" y="${cy + 76}" font-family="Segoe UI" font-size="14" font-weight="800" fill="${INK}">${sheetName}</text>
@@ -221,7 +238,8 @@ const Plano = (() => {
     g += txt(bx + 12, by + 22, "escala gráfica (m)", { fs: 10.5, c: MUTE, a: "start" });
     g += txt(bx + 12, by + 78, `PILETA ${fmt(L)} × ${fmt(W)} m · ${cfg.tdef.name.toUpperCase()}`, { fs: 13.5, a: "start" });
     g += txt(bx + 12, by + 98, `${BORDERS[cfg.borderType].name} · V ${fmt(geo.volume)} m³ · ${FINISHES[cfg.finish].name.split("(")[0].trim()}`, { fs: 11, a: "start", c: MUTE, w: "500" });
-    g += txt(bx + 12, by + 116, `ObraAcuática ${DATA_VERSION} · plano orientativo — ejecutivo: ingeniería matriculada`, { fs: 9.5, a: "start", c: "#9aa7b1", w: "500" });
+    const pieM = marcaPlano();
+    g += txt(bx + 12, by + 116, (pieM ? pieM.nombre.replace(" · estudio de piletas", "") + " " + DATA_VERSION : "plano orientativo") + " — ejecutivo: ingeniería matriculada", { fs: 9.5, a: "start", c: "#9aa7b1", w: "500" });
 
     // norte
     g += `<circle cx="${fullW - 40}" cy="${mTop * S - 20}" r="17" fill="#fff" stroke="${MUTE}" stroke-width="1.2"/>`;
@@ -437,13 +455,14 @@ const Plano = (() => {
     // flecha norte + título
     g += txt(ox + (maxX - minX) + 0.6 * s, oy + 0.5 * s, "AXO", { fs: 12, a: "start" });
     const ty = fullH - 0.7 * s;
-    g += txt(fullW / 2, ty, `AXONOMÉTRICA · ${cfg.tdef.name.toUpperCase()} · ${fmt(L)} × ${fmt(W)} m · ${BORDERS[cfg.borderType].name} · ObraAcuática ${DATA_VERSION}`, { c: MUTE, fs: 11.5 });
+    g += txt(fullW / 2, ty, `AXONOMÉTRICA · ${cfg.tdef.name.toUpperCase()} · ${fmt(L)} × ${fmt(W)} m · ${BORDERS[cfg.borderType].name} · ${marcaPlano() ? marcaPlano().nombre.replace(" · estudio de piletas", "") + " " + DATA_VERSION : "plano orientativo"}`, { c: MUTE, fs: 11.5 });
 
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${fullW.toFixed(0)} ${fullH.toFixed(0)}" style="max-width:100%;height:auto">
       ${defs}<rect width="100%" height="100%" fill="#ffffff"/>${g}${sheetFrame(fullW, fullH, cfg, "AXONOMÉTRICA DEL CONJUNTO", "02")}</svg>`;
   }
 
   function render(view, detail, cfg, geo, hyd) {
+    AQUA = tinte();   // branding white recolorea el agua del plano
     SHEET.vol = geo.volume;
     if (view === "corteT") return corteT(cfg, geo, hyd);
     if (view === "corteL") return corteL(cfg, geo, hyd);

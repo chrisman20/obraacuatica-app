@@ -83,10 +83,12 @@ const Cobro = (() => {
   function esPro() { return estado().activo && (estado().plan === "pro" || estado().plan === "white"); }
 
   /* ---------- activar / desactivar ---------- */
-  function activar(planId, fuente) {
+  function activar(planId, fuente, expiraServer) {
     const p = planDe(planId);
     let expira = null;
-    if (p.duracionDias) {
+    if (expiraServer) {
+      expira = String(expiraServer);              // la fija el server (canje)
+    } else if (p.duracionDias) {
       const ms = Date.now() + p.duracionDias * 86400000;
       expira = new Date(ms).toISOString();
     }
@@ -101,15 +103,103 @@ const Cobro = (() => {
   function pagosActivos() {
     return !!(CONFIG.pagos_activos && CONFIG.mpLink && /^https:\/\/(mpago\.la|link\.mercadopago\.com\.ar)/.test(CONFIG.mpLink));
   }
-  function activarManual(planId) {
-    activar(planId, "manual-pendiente");
-    Dialogos.toast("Anotamos tu pago — te activamos al acreditar (hasta 24 h)", "ok");
+  function reclamarPago(planId) {
+    // P0 TOTE r1: "Ya pagué" JAMÁS activa el plan client-side (regla 21:
+    // activación solo por webhook firmado / canje verificado server-side).
+    // Guarda un reclamo visible y el plan sigue en su estado real.
+    try {
+      localStorage.setItem("obracuatica_reclamo_pago", JSON.stringify({ plan: planId, fecha: Date.now() }));
+    } catch (e) { /* sin localStorage */ }
+    Dialogos.info({
+      titulo: "📌 Reclamo anotado",
+      primario: true,
+      html: '<p class="dlg-text">Tu reclamo quedó registrado. <b>No activamos nada sin pago verificado</b>: el plan se activa solo cuando el pago acredita (webhook firmado) o canjeando el código que te enviamos.</p>' +
+            '<p class="hint" style="margin:.5rem 0 0;font-size:.75rem">¿Tenés un código de activación? Canjealo en la pestaña Planes, sección "Tu plan".</p>'
+    });
     if (typeof UI !== "undefined" && UI.renderPlanes) UI.renderPlanes();
   }
   function simularPago(planId) {
     activar(planId, "simulado");
     Dialogos.toast("Plan activado en MODO SIMULADO — no se cobró nada", "ok");
     if (typeof UI !== "undefined" && UI.renderPlanes) UI.renderPlanes();
+  }
+
+  /* ---------- canje de codigo: la UNICA via de activacion real (regla 21) ----------
+     El codigo lo emite el webhook firmado (functions/api/cobro/webhook.js) y se
+     valida SIEMPRE server-side en /api/cobro/canjear (HMAC con secret del env,
+     la clave jamas toca el front). El front solo presenta el codigo. */
+  function canjear(codigo) {
+    const cod = String(codigo || "").trim().slice(0, 120);
+    if (!cod) return Promise.resolve({ ok: false, error: "Codigo vacio" });
+    return fetch("/api/cobro/canjear", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ codigo: cod })
+    }).then(r => r.json()).then(j => {
+      if (!j || !j.ok) {
+        Dialogos.toast(j && j.error ? "X " + j.error : "Codigo invalido", "error");
+        return { ok: false, error: (j && j.error) || "invalido" };
+      }
+      activar(j.plan, "mp-verificado", j.expira);   // la expiracion la fija el server
+      Dialogos.toast("Plan " + j.plan.toUpperCase() + " activado - pago verificado", "ok");
+      if (typeof UI !== "undefined" && UI.renderPlanes) UI.renderPlanes();
+      return { ok: true };
+    }).catch(() => {
+      Dialogos.toast("Sin backend de cobro en este entorno - el canje corre en el deploy", "error");
+      return { ok: false };
+    });
+  }
+
+  /* ---------- marca de agua: lo vendido se entrega (P0 TOTE r1) ---------- */
+  function marcaRequerida() { return !esPro(); }
+  function marcaTexto() { return branding().texto || CONFIG.marca; }
+
+  /* ---------- white-label real (P0 TOTE r1) ---------- */
+  const KEY_BRANDING = "obracuatica_branding";
+  function branding() {
+    try { return JSON.parse(localStorage.getItem(KEY_BRANDING) || "null") || {}; }
+    catch (e) { return {}; }
+  }
+  function guardarBranding(b) {
+    if (!activo("white")) {
+      Dialogos.toast("El re-branding es del plan Constructoras (white-label)", "error");
+      return;
+    }
+    localStorage.setItem(KEY_BRANDING, JSON.stringify(b || {}));
+    aplicarBranding();
+  }
+  function aplicarBranding() {
+    if (!activo("white")) return;
+    const b = branding();
+    if (b.color) {
+      const rs = document.documentElement.style;
+      rs.setProperty("--aqua", b.color);
+      rs.setProperty("--aqua-bright", b.color);
+      rs.setProperty("--aqua-line", b.color + "66");
+    }
+    const logo = document.querySelector(".topbar .logo");
+    if (logo && b.texto) logo.textContent = b.texto.slice(0, 3);
+    const h1 = document.querySelector(".brand-txt h1");
+    if (h1 && b.texto) h1.textContent = b.texto;
+  }
+  function editorBranding() {
+    if (!activo("white")) {
+      Dialogos.toast("El re-branding es del plan Constructoras (white-label)", "error");
+      return;
+    }
+    Dialogos.pedir({
+      titulo: "Editor de marca (white-label)",
+      btnOk: "Aplicar mi marca",
+      campos: [
+        { label: "Nombre de tu empresa (marca en planos e informes)", ph: "Constructora del Norte", valor: branding().texto || "" },
+        { label: "Color de acento (hex, ej #E67E22)", ph: "#E67E22", valor: branding().color || "" }
+      ]
+    }).then(resp => {
+      if (!resp) return;
+      const color = resp[1] && /^#[0-9a-fA-F]{3,8}$/.test(resp[1]) ? resp[1] : null;
+      guardarBranding({ texto: resp[0], color });
+      Dialogos.toast("Marca aplicada: " + resp[0], "ok");
+    });
   }
 
   /* ---------- checkout honesto (SIMULADO o MP real) ---------- */
@@ -126,7 +216,7 @@ const Cobro = (() => {
               '<p class="hint" style="margin:.5rem 0 0;font-size:.75rem">Incluye: ' + incl + '…</p>',
         extra: [
           { texto: "💳 Ir a Mercado Pago", clase: "btn primary", fn: () => { window.open(CONFIG.mpLink, "_blank", "noopener"); } },
-          { texto: "Ya pagué", clase: "btn", fn: () => activarManual(planId) }
+          { texto: "Ya pagué", clase: "btn", fn: () => reclamarPago(planId) }
         ]
       });
     } else {
@@ -156,11 +246,24 @@ const Cobro = (() => {
       '  <div style="display:flex;gap:.5rem;flex-wrap:wrap">' +
       '    <button class="btn primary" id="btnCambiarPlan" type="button">Cambiar de plan</button>' +
       '    <button class="btn" id="btnBajaPlan" type="button">Bajar a Gratis</button>' +
+      (e.fuente === "mp-verificado" || e.fuente === "simulado" ? '' : '') +
+      '  </div>' +
+      '  <div style="display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap;align-items:center">' +
+      '    <input id="canjeCodigo" class="dlg-inp" style="flex:1;min-width:170px" placeholder="Código de activación (pago verificado)" maxlength="120">' +
+      '    <button class="btn" id="btnCanjear" type="button">Canjear</button>' +
+      (e.plan === "white" && e.activo ? '    <button class="btn" id="btnMarca" type="button">🎨 Mi marca</button>' : '') +
       '  </div>' +
       '  <p class="hint" style="margin:.5rem 0 0;font-size:.7rem">pagos_activos: ' + (pagosActivos() ? "ON (MP real)" : "OFF (checkout SIMULADO)") + '</p>' +
       '</div>';
     const bc = box.querySelector("#btnCambiarPlan");
     if (bc) bc.onclick = () => checkout(e.plan === "white" ? "white" : "pro");
+    const bi = box.querySelector("#btnCanjear");
+    if (bi) bi.onclick = () => {
+      const inp = box.querySelector("#canjeCodigo");
+      if (inp && inp.value.trim()) canjear(inp.value.trim());
+    };
+    const bm = box.querySelector("#btnMarca");
+    if (bm) bm.onclick = () => editorBranding();
     const bb = box.querySelector("#btnBajaPlan");
     if (bb) bb.onclick = async () => {
       const ok = await Dialogos.confirmar({ titulo: "Bajar a Gratis", texto: "Perdés exports ilimitados y planos sin marca. ¿Seguir?", btnOk: "Sí, bajar a Gratis", peligro: true });
@@ -180,5 +283,5 @@ const Cobro = (() => {
   }
 
   migrar();
-  return { PLANS, estado, activo, esPro, activar, desactivar, checkout, pagosActivos, renderGestion, avisarSiVencida, planDe, precioDe };
+  return { PLANS, estado, activo, esPro, activar, desactivar, checkout, pagosActivos, renderGestion, avisarSiVencida, planDe, precioDe, canjear, marcaRequerida, marcaTexto, branding, guardarBranding, aplicarBranding, editorBranding, reclamarPago };
 })();

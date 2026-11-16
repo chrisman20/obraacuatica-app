@@ -9,6 +9,17 @@
 
 const Obra = (() => {
 
+  /* pie con marca: lo vendido se entrega (P0 TOTE r1) — gratis lleva marca,
+     Pro/White sin marca (o con la marca del cliente en white) */
+  function pieMarca() {
+    const conCobro = typeof Cobro !== "undefined";
+    if (conCobro && !Cobro.marcaRequerida()) {
+      const bt = Cobro.branding().texto;
+      return bt ? "Generado con " + bt + " " + DATA_VERSION : "";
+    }
+    return "Generado con ObraAcuatica " + (typeof DATA_VERSION !== "undefined" ? DATA_VERSION : "");
+  }
+
   const TRACK_PHASES = ["pre", "struct", "water", "install", "startup"];
   const $ = id => document.getElementById(id);
   const fmtARS = n => "$ " + Math.round(n).toLocaleString("es-AR");
@@ -318,7 +329,7 @@ ${plan.map(h => `<tr><td>${h.label}</td><td>${h.pct}%</td><td>${fmtARS(h.amount)
 
 <div class="firma"><div> Firma del contratista</div><div>Conformidad del cliente</div></div>
 
-<footer>Generado con ObraAcuática · ${DATA_VERSION} · ${fmtDate(today)}</footer>
+<footer>${pieMarca() ? pieMarca() + " · " : ""}${fmtDate(today)}</footer>
 </body></html>`;
   }
 
@@ -404,7 +415,7 @@ Informe completo con planos en el HTML adjunto 📐`;
     lines.push(`- IVA de compra${regime === "reducido" ? " (10,5% lista + 21% resto)" : " (21%)"}: **$${Math.round((x.iva10 || 0) + (x.iva21 || 0)).toLocaleString("es-AR")}**${x.iva10 ? ` — de los cuales al 10,5%: $${Math.round(x.iva10).toLocaleString("es-AR")}` : ""}`);
     lines.push(`- Con contingencia ${Math.round(x.cont * 100)}%: **$${Math.round(x.subtotal).toLocaleString("es-AR")}**`);
     lines.push(`- Precio de obra (margen ${Math.round(x.margin * 100)}%${x.withIVA ? " + IVA 21% venta" : " sin IVA"}): **$${Math.round(x.price).toLocaleString("es-AR")}**`);
-    lines.push(``, `_Generado con ObraAcuática ${DATA_VERSION} · precios referenciales — validez 15 días. El 10,5% rige con la obra adherida al régimen: confirmalo con tu contador._`);
+    lines.push(``, `_${pieMarca() ? pieMarca() + " · " : ""}precios referenciales — validez 15 días. El 10,5% rige con la obra adherida al régimen: confirmalo con tu contador._`);
     return lines.join("\n");
   }
 
@@ -425,7 +436,7 @@ Informe completo con planos en el HTML adjunto 📐`;
       <h3>Presupuesto de materiales</h3>${t.html}
       <h3>Plan de pagos</h3>
       <table border="1">${DEFAULT_PAYMENT_PLAN.map(h => `<tr><td>${h.label}</td><td>${h.pct}%</td><td>$${Math.round(t.meta.price * h.pct / 100).toLocaleString("es-AR")}</td></tr>`).join("")}</table>
-      <p><i>Generado con ObraAcuática · validez 15 días.</i></p></body></html>`;
+      <p><i>${pieMarca() ? pieMarca() + " · " : ""}validez 15 días.</i></p></body></html>`;
     download(html, `presupuesto-pileta-${cfg.type}.doc`, "application/msword");
   }
 

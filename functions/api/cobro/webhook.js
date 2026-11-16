@@ -45,10 +45,22 @@ export const onRequestPost = async ({ request, env }) => {
   //    (log de Pages Functions) y el dueño activa por su panel/WhatsApp.
   //    Con base (fase 2), acá va UPDATE suscripciones SET plan='pro' WHERE email = ?
   const email = (pago.payer && pago.payer.email) || "desconocido";
-  console.log(JSON.stringify({ evento: "cobro_aprobado", email, monto: pago.transaction_amount, moneda: pago.currency_id, external: pago.external_reference }));
-  return new Response(JSON.stringify({ ok: true, notas: "pago aprobado registrado" }), { status: 200, headers });
+  // Eslabón de activación (regla 21): el webhook EMITE un código de canje
+  // firmado HMAC (MP_WEBHOOK_SECRET) para el plan del pago. El dueño lo copia
+  // del log de Pages Functions y se lo pasa al pagador, que lo canjea en la
+  // app → /api/cobro/canjear valida la firma server-side y activa.
+  // Sin DB todavía, el canal de entrega es el dueño (fase 2: email automático).
+  const planDeMonto = (pago.transaction_amount >= 400) ? "white" : "pro";
+  const payload = b64url(JSON.stringify({ plan: planDeMonto, email, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 }));
+  const firma = (await hmacSha256Hex(MP_SECRET, payload)).slice(0, 16);
+  const codigo = payload + "." + firma;
+  console.log(JSON.stringify({ evento: "cobro_aprobado", email, monto: pago.transaction_amount, moneda: pago.currency_id, external: pago.external_reference, codigo_canje: codigo }));
+  return new Response(JSON.stringify({ ok: true, notas: "pago aprobado registrado; código de canje en el log" }), { status: 200, headers });
 };
 
+function b64url(s) {
+  return btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
 async function hmacSha256Hex(secret, texto) {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);

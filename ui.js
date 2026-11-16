@@ -793,8 +793,10 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
     const pj = loadProjects().find(p => p.id === id);
     if (!pj) return;
     // tipo
-    const card = document.querySelector(`.type-card[data-type="${pj.type}"]`);
-    if (card) { document.querySelectorAll(".type-card").forEach(c => c.classList.remove("selected")); card.classList.add("selected"); }
+    // fix P0 TOTE r1: las tarjetas se renderizan como .ts-card (ui.js:68) — el
+    // selector viejo .type-card no matcheaba NADA y el tipo no se restauraba
+    const card = document.querySelector(`.ts-card[data-type="${pj.type}"]`);
+    if (card) { document.querySelectorAll(".ts-card").forEach(c => c.classList.remove("selected")); card.classList.add("selected"); }
     applyTypePreset(pj.type);
     // campos
     Object.entries(pj.snap.fields).forEach(([idv, v]) => {

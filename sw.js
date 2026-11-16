@@ -2,8 +2,8 @@
    Cache-first con precache de la app completa (todo local,
    sin llamadas externas): primera visita guarda, de ahí en
    más abre instantáneo y SIN internet (PWA instalable). */
-const CACHE = "obracuatica-v4.1";
-const V = "?v=4.1";   // bump junto con CACHE: cambia la query = recurso nuevo, nunca colisión de versiones
+const CACHE = "obracuatica-v4.2";
+const V = "?v=4.2";   // bump junto con CACHE: cambia la query = recurso nuevo, nunca colisión de versiones
 const ASSETS = [
   "./", "./index.html", "./styles.css" + V,
   "./data.js" + V, "./dialogos.js" + V, "./medir.js" + V, "./cobro.js" + V, "./protocols.js" + V, "./engine.js" + V,

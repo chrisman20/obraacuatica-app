@@ -34,6 +34,12 @@ presupuesto firmable. Estado: v4.1.
       localStorage (obracuatica_suscripcion).
 
 ## Estado del corazón
+- 15/11/2026 | TOTE r1: la crítica halló que 'Proyectos guardados' (feature
+  vendida del plan Pro) NO restauraba el sistema constructivo (selector roto
+  ui.js:796) — presupuesto del sistema equivocado EN SILENCIO. Arreglado y
+  probado punta a punta en navegador (vidrio guardado→recargado→restaurado,
+  motor recalcula 30,6 m³). El corazón ahora tiene check permanente:
+  `node tests/e2e-corazon.mjs` + gates tote-r1 en smoke-seguridad.
 - 15/11/2026 | PROBADO punta a punta con dato real: SÍ | por el constructor del
   pase de madurez (agente fábrica) | Navegador real, dato vivo 6×3,2 → 15,84 m³
   y cobro SIMULADO completo. Pendiente del dueño: repetir el recorrido en el

@@ -91,7 +91,7 @@ const Freemium = {
 
 /* Fotos reales por tipo (CC descargadas localmente — ver CREDITS-FOTOS.md).
    ?v= para cache-busting: cada release se bump junto con SW. */
-const IMG_V = "?v=4.1";
+const IMG_V = "?v=4.2";
 const PHOTOS = {
   hero: "img/hero.jpg" + IMG_V,
   arena: "img/arena.jpg" + IMG_V,

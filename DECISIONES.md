@@ -51,3 +51,28 @@ tenés el volumen (15,84 m³), el caudal, el presupuesto con IVA (18 rubros,
 $9.468.500) y el plan Pro SIMULADO completo con sus 3 salidas y su gate real.
 Lo que NO firmo todavía: el cobro real (necesita el link de MP del dueño) y el
 deploy productivo — por eso VENDIBLE-CANDIDATO, no LISTA-PARA-VENDER.
+
+## TOTE r1 (15/11/2026) — el pase se auto-corrigió: 3 P0 que yo mismo dejé
+
+TEST: crítica posterior encontró 3 P0 en lo que el pase había declarado verde.
+INTERVENCIÓN (una, apuntada a los 3): (1) ui.js loadProject selector .type-card
+→ .ts-card (el tipo guardado NO se restauraba y el presupuesto salía del sistema
+equivocado en silencio); (2) "Ya pagué" dejaba de activar client-side (reclamo
+anotado) y la activación real quedó en canje validado server-side
+(functions/api/cobro/canjear.js: HMAC + TTL 30d; el webhook firmado ahora EMITE
+el código en su log — el encendido ya es credencial + flag, sin refactor);
+(3) marca de agua y white-label REALES: planos.js marcaPlano()/tinte() +
+obra.js pieMarca() — gratis con marca, Pro sin, white con marca y color del
+cliente (verificado en vivo: 5 apariciones del color en el plano).
+RE-TEST: gates EXIT=0 (smoke-seguridad 105+ checks, smoke-ui, e2e-corazón) +
+pruebas en navegador (vidrio restaurado, Ya-pagué no activa, 3 estados de marca).
+
+### Línea KAIZEN r1
+El constructor del pase no puede ser quien declara "verde" sin la crítica
+(regla 14): mis propios smokes no veían un selector contra un clase que no
+existe, una activación client-side y features vendidas sin implementar — los
+checks verificaban presencia de archivos y patrones, no PROMESAS de la UI.
+Lección convertida en gates: (a) todo texto vendido de la tabla de planes debe
+tener su check de implementación (marca condicional existe); (b) toda ruta de
+activación debe demostrar que NO activa sin server (check negativo); (c) el
+selector de restauración se prueba guardar→recargar→cargar, no con regex.
