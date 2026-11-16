@@ -136,6 +136,21 @@ check("health endpoint presente", read("functions/api/health.js").includes("ok: 
   check("tote-r1 p0-3: white-label implementado (branding aplicable)", cobro.includes("function aplicarBranding") && cobro.includes("obracuatica_branding") && planos.includes("tinte()"));
 })()
 
+// ── TOTE r2 (15/11): el webhook jamás deduce el plan del monto sin moneda ──
+;(function(){
+  const webhook = read("functions/api/cobro/webhook.js");
+  const preferencia = read("functions/api/cobro/preferencia.js");
+  // check negativo: la deducción por umbral quedó prohibida
+  check("tote-r2: sin deducción de plan por umbral de monto (bomba r1 prohibida)", !/transaction_amount\s*>=\s*\d+\s*\?/.test(webhook) && !webhook.includes("planDeMonto"));
+  // el plan viaja EXPLÍCITO en external_reference (preferencia ya lo pone)
+  check("tote-r2: plan desde external_reference con whitelist", /external_reference \|\| ""/.test(webhook) && /obracuatica-\(pro\|white\)-/.test(webhook) && preferencia.includes('external_reference: "obracuatica-" + plan'));
+  // fail-closed: sin precio esperado declarado no se emite código
+  check("tote-r2: fail-closed sin MP_PRECIO_* en env", webhook.includes("cobro_precio_no_declarado") && webhook.includes("MP_PRECIO_PRO") && webhook.includes("MP_PRECIO_WHITE"));
+  // moneda declarada validada + monto >= precio esperado
+  check("tote-r2: moneda validada contra MP_MONEDA y monto >= precio del plan", webhook.includes("cobro_moneda_inesperada") && webhook.includes("cobro_monto_insuficiente"));
+  // canjear mantiene whitelist (pro/white) — sin default por monto en toda la cadena
+  check("tote-r2: canjear sin deducción por monto (whitelist explícita)", !read("functions/api/cobro/canjear.js").includes("transaction_amount") && read("functions/api/cobro/canjear.js").includes('PLANS_OK = ["pro", "white"]'));
+})();
 // ---------- RESULTADO ----------
 
 if (failures) {

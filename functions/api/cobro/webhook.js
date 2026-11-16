@@ -50,11 +50,36 @@ export const onRequestPost = async ({ request, env }) => {
   // del log de Pages Functions y se lo pasa al pagador, que lo canjea en la
   // app → /api/cobro/canjear valida la firma server-side y activa.
   // Sin DB todavía, el canal de entrega es el dueño (fase 2: email automático).
-  const planDeMonto = (pago.transaction_amount >= 400) ? "white" : "pro";
-  const payload = b64url(JSON.stringify({ plan: planDeMonto, email, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 }));
+  // P0 TOTE r2: el plan JAMÁS se deduce del monto (una comparación sin moneda
+  // entregaba white a todo pagador de Pro en ARS). El plan viaja EXPLÍCITO en
+  // external_reference (preferencia.js: "obracuatica-<plan>-<ts>") y el código
+  // solo se emite FAIL-CLOSED: moneda declarada coincide + monto >= precio
+  // esperado del plan (env.MP_PRECIO_PRO / MP_PRECIO_WHITE en MP_MONEDA).
+  const ref = String(pago.external_reference || "");
+  const mRef = ref.match(/^obracuatica-(pro|white)-\d+$/);
+  const preciosEsperados = { pro: Number(env.MP_PRECIO_PRO), white: Number(env.MP_PRECIO_WHITE) };
+  const planDePago = mRef ? mRef[1] : null;
+  const logEvento = (evento) => console.log(JSON.stringify({ evento, email, monto: pago.transaction_amount, moneda: pago.currency_id, external: ref }));
+  if (!planDePago) {           // sin plan explícito válido: jamás se adivina
+    logEvento("cobro_sin_plan_valido");
+    return new Response(JSON.stringify({ ok: true, notas: "pago registrado sin plan identificable: código NO emitido (fail-closed)" }), { status: 200, headers });
+  }
+  if (!preciosEsperados[planDePago] || preciosEsperados[planDePago] <= 0) {
+    logEvento("cobro_precio_no_declarado");
+    return new Response(JSON.stringify({ ok: true, notas: "falta MP_PRECIO_" + planDePago.toUpperCase() + " en env: código NO emitido (fail-closed)" }), { status: 200, headers });
+  }
+  if (env.MP_MONEDA && pago.currency_id !== env.MP_MONEDA) {
+    logEvento("cobro_moneda_inesperada");
+    return new Response(JSON.stringify({ ok: true, notas: "moneda " + pago.currency_id + " no coincide con MP_MONEDA: código NO emitido (fail-closed)" }), { status: 200, headers });
+  }
+  if (!(Number(pago.transaction_amount) >= preciosEsperados[planDePago])) {
+    logEvento("cobro_monto_insuficiente");
+    return new Response(JSON.stringify({ ok: true, notas: "monto menor al precio esperado del plan: código NO emitido (fail-closed)" }), { status: 200, headers });
+  }
+  const payload = b64url(JSON.stringify({ plan: planDePago, email, exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30 }));
   const firma = (await hmacSha256Hex(MP_SECRET, payload)).slice(0, 16);
   const codigo = payload + "." + firma;
-  console.log(JSON.stringify({ evento: "cobro_aprobado", email, monto: pago.transaction_amount, moneda: pago.currency_id, external: pago.external_reference, codigo_canje: codigo }));
+  console.log(JSON.stringify({ evento: "cobro_aprobado", email, monto: pago.transaction_amount, moneda: pago.currency_id, external: ref, codigo_canje: codigo }));
   return new Response(JSON.stringify({ ok: true, notas: "pago aprobado registrado; código de canje en el log" }), { status: 200, headers });
 };
 

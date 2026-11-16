@@ -76,3 +76,15 @@ Lección convertida en gates: (a) todo texto vendido de la tabla de planes debe
 tener su check de implementación (marca condicional existe); (b) toda ruta de
 activación debe demostrar que NO activa sin server (check negativo); (c) el
 selector de restauración se prueba guardar→recargar→cargar, no con regex.
+
+## TOTE r2 (15/11/2026) — el eslabón que r1 construyó se rompía con el encendido
+TEST: el webhook deducía el plan por umbral de monto sin moneda (`>= 400 → white`):
+con el link MP argentino (ARS), TODO pagador de Pro (~15.000 ARS) recibiría
+código white (365 días) y ninguno pro — el encendido real entregaba el plan
+equivocado a todos. INTERVENCIÓN: plan EXPLÍCITO desde external_reference
+(preferencia.js ya lo firmaba) + emisión FAIL-CLOSED (sin plan válido / sin
+MP_PRECIO_* / moneda ≠ MP_MONEDA / monto < precio → evento en el log, cero
+código). RE-TEST: 6 casos simulados en Node EXIT=0 + checks tote-r2 permanentes
+EXIT=0. KAIZEN r2: en dinero, toda DEDUCCIÓN es una bomba de encendido — el
+plan se transporta, nunca se adivina; y todo umbral sin moneda/precio declarado
+es fail-closed o no se enciende.
