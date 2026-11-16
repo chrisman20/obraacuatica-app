@@ -88,3 +88,17 @@ código). RE-TEST: 6 casos simulados en Node EXIT=0 + checks tote-r2 permanentes
 EXIT=0. KAIZEN r2: en dinero, toda DEDUCCIÓN es una bomba de encendido — el
 plan se transporta, nunca se adivina; y todo umbral sin moneda/precio declarado
 es fail-closed o no se enciende.
+
+## TOTE r3 (16/11/2026) — el repo en rojo y la segunda fuente de precio
+TEST: (A) el push del proceso paralelo (6f63a36: SW v4.3) dejó index/data en v4.2
+→ los gates declarados "verde" estaban ROJOS en el HEAD entregado (nadie lo
+volvió a correr tras el push); (B) preferencia.js hardcodeaba precio y fallback
+USD: con el encendido ARS de la bandeja creaba links de 15 ARS que el webhook
+rechazaba — circuito documentado que no entrega nada. INTERVENCIÓN: bump
+?v=4.3 (index+data) + preferencia con la MISMA fuente que el webhook
+(MP_PRECIO_*/MP_MONEDA, fail-closed 503, whitelist de plan sin default). 
+RE-TEST: 4 gates EXIT=0 (redirect + $? real) + 7/7 casos de simulación
+(preferencia 15500 ARS → webhook emite pro). KAIZEN r3: (1) después de cada
+push, el HEAD NUEVO se re-gatea — nadie hereda un "verde" de otro commit;
+(2) en dinero, precio y moneda tienen UNA fuente (env) y toda ausencia es
+fail-closed — un default cómodo (USD, 15) es una bomba con fecha.

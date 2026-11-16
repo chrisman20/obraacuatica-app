@@ -151,6 +151,17 @@ check("health endpoint presente", read("functions/api/health.js").includes("ok: 
   // canjear mantiene whitelist (pro/white) — sin default por monto en toda la cadena
   check("tote-r2: canjear sin deducción por monto (whitelist explícita)", !read("functions/api/cobro/canjear.js").includes("transaction_amount") && read("functions/api/cobro/canjear.js").includes('PLANS_OK = ["pro", "white"]'));
 })();
+
+// ── TOTE r3 (16/11): UNA sola fuente de precio/moneda — preferencia y webhook ──
+;(function(){
+  const pref = read("functions/api/cobro/preferencia.js");
+  const webhook = read("functions/api/cobro/webhook.js");
+  check("tote-r3: preferencia SIN precio hardcodeado (el 500:15 creaba links de 15 ARS)", !/\?\s*500\s*:\s*15/.test(pref));
+  check("tote-r3: preferencia lee MP_PRECIO_PRO/WHITE del env (misma fuente que el webhook)", pref.includes("MP_PRECIO_PRO") && pref.includes("MP_PRECIO_WHITE") && webhook.includes("MP_PRECIO_PRO"));
+  check("tote-r3: preferencia sin fallback USD (MP_MONEDA obligatoria, fail-closed)", !pref.includes('|| "USD"') && pref.includes("MP_MONEDA"));
+  check("tote-r3: preferencia fail-closed sin envs de precio/moneda (503 SIMULADO_INACTIVO)", (pref.match(/SIMULADO_INACTIVO/g) || []).length >= 3);
+  check("tote-r3: preferencia valida whitelist de plan (sin default silencioso)", pref.includes('PLANS_OK = ["pro", "white"]'));
+})();
 // ---------- RESULTADO ----------
 
 if (failures) {
