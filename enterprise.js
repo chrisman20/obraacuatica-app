@@ -244,7 +244,7 @@ const Enterprise = (() => {
       const el = document.createElement("div");
       el.className = "prov-modal";
       el.innerHTML = `<div class="prov-box">
-        <button class="prov-close" onclick="this.closest('.prov-modal').remove()">✕</button>
+        <button class="prov-close" aria-label="Cerrar ventana" type="button">✕</button>
         <h3>⌨️ Atajos de teclado</h3>
         <div class="table-wrap"><table>
           <thead><tr><th>Combinación</th><th>Acción</th></tr></thead>
@@ -315,7 +315,7 @@ const Enterprise = (() => {
       const el = document.createElement("div");
       el.className = "prov-modal";
       el.innerHTML = `<div class="prov-box" style="max-width:700px">
-        <button class="prov-close" onclick="this.closest('.prov-modal').remove()">✕</button>
+        <button class="prov-close" aria-label="Cerrar ventana" type="button">✕</button>
         <h3>🩺 Health Dashboard — estado de la app</h3>
         <div class="kpi-grid" style="margin:0.8rem 0">
           ${kpiRow("⚡ Load time", m.loadTime + " ms", m.loadTime < 2000 ? "" : "lento")}
@@ -440,7 +440,7 @@ const Enterprise = (() => {
       const passed = this.results.filter(r => r.ok).length;
       const allOk = passed === this.results.length;
       el.innerHTML = `<div class="prov-box" style="max-width:600px">
-        <button class="prov-close" onclick="this.closest('.prov-modal').remove()">✕</button>
+        <button class="prov-close" aria-label="Cerrar ventana" type="button">✕</button>
         <h3>🧪 Self-Test — ${allOk ? "✅ TODO OK" : `⚠️ ${passed}/${this.results.length}`} </h3>
         <div class="table-wrap"><table>
           <thead><tr><th>Test</th><th>Resultado</th><th>Detalle</th></tr></thead>
@@ -592,6 +592,24 @@ const Enterprise = (() => {
     commands
   };
 })();
+
+// Delegación global de modales .prov-modal (P1 CSP: cero onclick inline):
+// ✕ cierra su modal · clic en el fondo cierra · Escape cierra el de arriba (A7).
+document.addEventListener("click", e => {
+  const c = e.target.closest(".prov-close");
+  if (c) {
+    const m = c.closest(".prov-modal");
+    if (m) m.remove();
+    return;
+  }
+  const m = e.target.closest(".prov-modal");
+  if (m && e.target === m) m.remove();
+});
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  const todos = document.querySelectorAll(".prov-modal");
+  if (todos.length) todos[todos.length - 1].remove();
+});
 
 // auto-init cuando el DOM está listo
 document.addEventListener("DOMContentLoaded", () => {

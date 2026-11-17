@@ -52,7 +52,11 @@ obracuatica/
 ├── obra.js         → seguimiento de obra + cronograma Gantt + informe cliente + exports Excel/Word/MD
 ├── functions/      → backend mínimo opcional (Cloudflare Pages): /api/health + webhook MP firmado
 ├── og-image.png    → carta de WhatsApp 1200×630 (regenerar con 99-HERRAMIENTAS/img-tools/og-obracuatica.py)
-├── tests/          → gates: smoke-seguridad.js + smoke-ui.js (node tests/…)
+├── terminos.html / privacidad.html → legal como páginas servibles (ola P1)
+├── splash-*.png    → splash iOS 4 tamaños (regenerar: node tools/gen-splash.js)
+├── ESPECIFICACION-APP.md → competidor hipotético + foso + vecinas (regla 16/20/22)
+├── CHANGELOG.md    → versiones del release (fuente única: APP_VERSION en data.js)
+├── tests/          → gates: smoke-seguridad + smoke-ui + smoke-contenido + e2e-corazon + e2e-backup
 └── ui.js           → render, tabs, chips, hero, localStorage de precios, CSV, planos
 ```
 

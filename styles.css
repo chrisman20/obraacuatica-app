@@ -759,6 +759,30 @@ footer {
   .type-grid { grid-template-columns: 1fr; }
 }
 
+/* prueba 375px (estándar a11y: el diseño se prueba a 375px antes de publicar) */
+@media (max-width: 390px) {
+  .topbar { flex-wrap: wrap; gap: 0.5rem; }
+  .tabs { gap: 0.3rem; }
+  .tabs button { font-size: 0.68rem; padding: 0.4rem 0.62rem; letter-spacing: 0; min-height: 40px; display: inline-flex; align-items: center; }
+  .tab-group .tg-label { font-size: 0.58rem; }
+  .landing { padding: 2.6rem 0.9rem 2rem; }
+  .landing-title { font-size: 1.62rem; line-height: 1.22; }
+  .landing-sub { font-size: 0.85rem; }
+  .landing-cta { flex-direction: column; gap: 0.6rem; }
+  .landing-cta .btn.big { width: 100%; }
+  .landing-stats { gap: 1.1rem; }
+  .landing-stats b { font-size: 1.25rem; }
+  .roles-grid { grid-template-columns: 1fr; }
+  .role-scene { height: 74px; }
+  .role-card { padding: 0.9rem 0.7rem; }
+  .rc-desc { font-size: 0.72rem; }
+  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fill-scene { max-width: 300px; }
+  .empty-ill { width: 170px; height: 72px; }
+  .form-row { flex-direction: column; align-items: stretch; }
+  .legal-main { padding: 0 0.7rem; }
+}
+
 /* ---------- hero illustration ---------- */
 .hero-card {
   display: flex;
@@ -1671,6 +1695,91 @@ details[open] summary { margin-bottom: 0.5rem; }
 }
 
 .rc-icon { font-size: 1.7rem; }
+
+/* ---------- escenas hero animadas por tipo de usuario (estándar §7.1-5) ---------- */
+.role-scene {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  height: 86px;
+  margin: 0 auto;
+}
+.role-card .rc-icon { margin-top: -0.3rem; }
+
+/* escena cliente: sol que respira, agua que ondula, flotador que cabcea */
+.rs-sun { animation: rsPulse 3.6s ease-in-out infinite; transform-origin: 216px 24px; }
+.rs-ray { animation: rsRay 3.6s ease-in-out infinite; }
+.rs-ray2, .rs-ray3 { animation-delay: 0.45s; }
+.rs-ray4 { animation-delay: 0.9s; }
+.rs-water { animation: rsDrift 5s linear infinite; }
+.rs-float { animation: rsBob 4.2s ease-in-out infinite; }
+@keyframes rsPulse { 0%, 100% { transform: scale(1); opacity: 0.95; } 50% { transform: scale(1.12); opacity: 1; } }
+@keyframes rsRay { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+@keyframes rsDrift { from { transform: translateX(0); } to { transform: translateX(-44px); } }
+@keyframes rsBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2.6px); } }
+
+/* escena pro: el plano se dibuja, las cotas aparecen, la grúa trabaja */
+.rs-draw-pool { animation: rsDraw 3.2s ease-in-out infinite; }
+.rs-draw-dims { animation: rsFadeIn 3.2s ease-in-out infinite; animation-delay: 1.1s; opacity: 0; }
+.rs-draw-cross { animation: rsFadeIn 3.2s ease-in-out infinite; animation-delay: 1.6s; opacity: 0; }
+.rs-crane-arm { animation: rsCrane 2.4s ease-in-out infinite; transform-origin: 236px 28px; }
+@keyframes rsDraw { 0% { stroke-dashoffset: 340; } 38%, 82% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 0; opacity: 0.4; } }
+@keyframes rsFadeIn { 0%, 30% { opacity: 0; } 45%, 85% { opacity: 1; } 100% { opacity: 0.35; } }
+@keyframes rsCrane { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(14deg); } }
+
+/* escena proveedor: camioneta en camino, ruedas girando, checklist que se tilda */
+.rs-truck { animation: rsHaul 3.4s ease-in-out infinite; }
+.rs-wheel { animation: rsSpin 1.1s linear infinite; transform-box: fill-box; transform-origin: center; }
+.rs-check { opacity: 0; animation: rsTick 4.2s ease-out infinite; }
+.rs-check2 { animation-delay: 0.5s; }
+.rs-check3 { animation-delay: 1s; }
+.rs-checklist { animation: rsFadeSlide 4.2s ease-out infinite; }
+@keyframes rsHaul { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+@keyframes rsSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes rsTick { 0%, 18% { opacity: 0; } 26%, 88% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes rsFadeSlide { 0% { opacity: 0.4; } 20% { opacity: 1; } 100% { opacity: 1; } }
+
+/* ---------- momento firma: la pileta se llena (estándar §7.1-9) ---------- */
+.fill-scene { max-width: 380px; margin: 0 auto 0.9rem; }
+.fill-scene svg { width: 100%; height: auto; display: block; }
+.fs-rise { animation: fsRise 1.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.fs-wave-g { animation: fsWave 3.2s linear infinite; }
+.fs-bub { animation: fsBub 2.8s ease-in infinite; }
+.fs-bub2 { animation-delay: 0.9s; }
+.fs-bub3 { animation-delay: 1.7s; }
+.fs-vol { animation: fsVolIn 0.9s ease-out 0.9s both; }
+@keyframes fsRise { from { transform: translateY(84px); } to { transform: translateY(0); } }
+@keyframes fsWave { from { transform: translateX(0); } to { transform: translateX(-52px); } }
+@keyframes fsBub { 0% { transform: translateY(0); opacity: 0; } 18% { opacity: 0.8; } 100% { transform: translateY(-58px); opacity: 0; } }
+@keyframes fsVolIn { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ---------- páginas legales servibles (términos / privacidad) ---------- */
+.legal-main { max-width: 760px; margin: 1.2rem auto 2rem; padding: 0 1rem; }
+.legal-main h3 { color: var(--aqua-bright); margin: 1.15rem 0 0.35rem; font-size: 0.95rem; letter-spacing: 0.2px; }
+.legal-main p { color: var(--txt); font-size: 0.9rem; line-height: 1.68; margin-bottom: 0.55rem; }
+.legal-main a { color: var(--aqua-bright); }
+
+/* ---------- vacíos ilustrados (estándar §7.1-6: el vacío con arte + salida) ---------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  text-align: center;
+  padding: 0.9rem 0.6rem 0.4rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.empty-state p { margin: 0; }
+.empty-ill { width: 200px; height: 84px; }
+.es-plus { animation: esPulse 2.6s ease-in-out infinite; transform-origin: 153px 44px; }
+.es-dash { animation: esDash 2.2s linear infinite; }
+@keyframes esPulse { 0%, 100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.1); opacity: 1; } }
+@keyframes esDash { to { stroke-dashoffset: -16; } }
+
 .rc-name { font-family: var(--font-display); font-size: 1.1rem; font-weight: 900; }
 .rc-desc { color: var(--muted); font-size: 0.74rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .rc-cta { color: var(--aqua-bright); font-weight: 700; font-size: 0.8rem; margin-top: 0.2rem; }

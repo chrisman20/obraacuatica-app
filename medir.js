@@ -53,12 +53,12 @@ const Medir = (() => {
     const s = document.createElement("script");
     s.src = "https://browser.sentry-cdn.com/7.119.0/bundle.tracing.min.js";
     s.crossOrigin = "anonymous";
-    s.onload = () => {
+    s.addEventListener("load", () => {
       try {
-        window.Sentry.init({ dsn, release: "obracuatica@" + (window.APP_VERSION || "4.1") });
+        window.Sentry.init({ dsn, release: "obracuatica@" + (window.APP_VERSION || "4.4") });
         sentryOn = true;
       } catch (e) { /* no activo */ }
-    };
+    });
     document.head.appendChild(s);
   }
 
@@ -82,5 +82,47 @@ const Medir = (() => {
     } catch (e) { fn(null); }
   }
 
-  return { enviar, sentry, turnstile, turnstileToken, anon };
+  /* ---------- PostHog session replay (P1: wiring inactivo por diseño) ----------
+     Encendido = DOS señales del dueño en CONFIG.analytics (bandeja):
+     posthog: "<key>"  +  posthogReplay: true. Sin ambas = cero red.
+     Al encender: sumar https://us.i.posthog.com al script-src del CSP
+     (una línea en index.html + _headers — documentado en PENDIENTES-DEL-DUENO). */
+  let replayOn = false;
+  function replay() {
+    const k = cfg().posthog;
+    const on = cfg().posthogReplay;
+    if (!k || on !== true || replayOn) return;
+    replayOn = true;
+    // stub oficial del loader (sin eval): define window.posthog y carga array.js
+    if (!window.posthog) {
+      window.posthog = function () { (window.posthog._i = window.posthog._i || []).push(arguments); };
+      const s = document.createElement("script");
+      s.src = "https://us.i.posthog.com/static/array.js";
+      s.async = true;
+      s.crossOrigin = "anonymous";
+      document.head.appendChild(s);
+    }
+    window.posthog("init", k, {
+      api_host: "https://us.i.posthog.com",
+      autocapture: false,          // sin PII: los eventos van por enviar()
+      session_replay: { maskAllInputs: true },
+      capture_pageview: false,
+      persistence: "memory"        // nada en storage del usuario
+    });
+    window.posthog("session_replay", { name: "replay" });
+  }
+
+  return { enviar, sentry, turnstile, turnstileToken, replay, anon };
 })();
+
+/* auto-arranque (fix de esta ola): sentry/turnstile/replay se encendían
+   "con credencial sin refactor" pero NADIE los llamaba — sin este disparo,
+   cargar la key en CONFIG no prendía nada. Sin credenciales = cero red. */
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof Medir === "undefined") return;
+  try {
+    Medir.sentry();
+    Medir.turnstile();
+    Medir.replay();
+  } catch (e) { /* nunca rompe la app */ }
+});

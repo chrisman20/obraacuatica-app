@@ -15,20 +15,25 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="og-image.png">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com https://browser.sentry-cdn.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Splash screens iOS (estándar §7.1-3: PWA instalable = splash por tamaño) -->
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="splash-750.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="splash-1170.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="splash-1290.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" href="splash-2048.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ObraAcuática">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=4.3">
+<link rel="stylesheet" href="styles.css?v=4.4">
 </head>
 <body data-app="obracuatica">
 
@@ -42,9 +47,9 @@
     <div class="user-chip hidden" id="userChip"></div>
   </div>
   <div style="display:flex;gap:0.5rem;align-items:center">
-    <button class="btn mini" onclick="Enterprise.Health.open()" title="🩺 Health Dashboard" type="button">🩺</button>
-    <button class="btn mini" onclick="Enterprise.SelfTest.run()" title="🧪 Tests" type="button">🧪</button>
-    <button class="btn mini" onclick="Enterprise.Theme.toggle()" title="🌓 Tema" type="button">🌓</button>
+    <button class="btn mini" id="btnTopHealth" title="🩺 Health Dashboard" aria-label="Health Dashboard" type="button">🩺</button>
+    <button class="btn mini" id="btnTopTests" title="🧪 Tests" aria-label="Correr tests" type="button">🧪</button>
+    <button class="btn mini" id="btnTopTheme" title="🌓 Tema" aria-label="Cambiar tema" type="button">🌓</button>
   </div>
 </header>
   <nav class="tabs" id="mainTabs">
@@ -124,6 +129,23 @@
     </div>
     <div class="roles-grid">
       <button class="role-card" data-role="cliente" type="button">
+        <svg class="role-scene" viewBox="0 0 260 96" aria-hidden="true" focusable="false">
+          <circle class="rs-sun" cx="216" cy="24" r="11" fill="#4FD8EC"/>
+          <g stroke="#4FD8EC" stroke-width="2" stroke-linecap="round" opacity="0.6">
+            <line class="rs-ray rs-ray1" x1="216" y1="4" x2="216" y2="9"/><line class="rs-ray rs-ray2" x1="236" y1="24" x2="241" y2="24"/>
+            <line class="rs-ray rs-ray3" x1="196" y1="24" x2="201" y2="24"/><line class="rs-ray rs-ray4" x1="216" y1="39" x2="216" y2="44"/>
+          </g>
+          <g class="rs-float">
+            <circle cx="96" cy="52" r="5" fill="#E8F6FA"/>
+            <path d="M101 56 q10 4 20 0 q10 -4 20 0 l0 8 q-20 6 -40 0 Z" fill="#E8F6FA" opacity="0.9"/>
+          </g>
+          <rect x="34" y="60" width="150" height="26" rx="9" fill="rgba(31,182,205,0.16)" stroke="#1FB6CD" stroke-width="1.5"/>
+          <g class="rs-water">
+            <path d="M40 70 q11 -4 22 0 t22 0 t22 0 t22 0 t22 0" fill="none" stroke="#4FD8EC" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+            <path d="M40 78 q11 -4 22 0 t22 0 t22 0 t22 0 t22 0" fill="none" stroke="#1FB6CD" stroke-width="1.6" stroke-linecap="round" opacity="0.5"/>
+          </g>
+          <path d="M14 88 h232" stroke="#0B6E88" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+        </svg>
         <div class="rc-icon">👤</div>
         <div class="rc-name">Cliente</div>
         <div class="rc-desc">Quiero una pileta: qué me conviene, cuánto puede salirme y qué exigirle al constructor.</div>
@@ -131,12 +153,48 @@
       </button>
       <button class="role-card featured" data-role="pro" type="button">
         <div class="rc-badge">LA HERRAMIENTA COMPLETA</div>
+        <svg class="role-scene" viewBox="0 0 260 96" aria-hidden="true" focusable="false">
+          <rect x="22" y="10" width="176" height="74" rx="6" fill="rgba(31,182,205,0.07)" stroke="#1FB6CD" stroke-width="1.4"/>
+          <rect class="rs-draw-pool" x="46" y="34" width="128" height="38" rx="5" fill="rgba(79,216,236,0.12)" stroke="#4FD8EC" stroke-width="2" stroke-dasharray="340" stroke-dashoffset="340"/>
+          <g class="rs-draw-dims" stroke="#84A9BB" stroke-width="1.3">
+            <line x1="46" y1="24" x2="174" y2="24"/><line x1="46" y1="20" x2="46" y2="28"/><line x1="174" y1="20" x2="174" y2="28"/>
+            <line x1="188" y1="34" x2="188" y2="72"/><line x1="184" y1="34" x2="192" y2="34"/><line x1="184" y1="72" x2="192" y2="72"/>
+          </g>
+          <path class="rs-draw-cross" d="M110 46 v14 M103 53 h14" stroke="#4FD8EC" stroke-width="1.6" stroke-linecap="round"/>
+          <g class="rs-crane">
+            <rect x="216" y="58" width="26" height="18" rx="3" fill="rgba(31,182,205,0.2)" stroke="#1FB6CD" stroke-width="1.5"/>
+            <path d="M222 58 v-30 h14 l0 30" fill="none" stroke="#84A9BB" stroke-width="1.6"/>
+            <line class="rs-crane-arm" x1="236" y1="28" x2="252" y2="40" stroke="#4FD8EC" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <path d="M206 88 h44" stroke="#0B6E88" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+        </svg>
         <div class="rc-icon">🏗️</div>
         <div class="rc-name">Profesional / Constructora</div>
         <div class="rc-desc">Presupuestar, calcular hidráulica, planos, protocolos de obra, fábrica y seguimiento.</div>
         <div class="rc-cta">Entrar al estudio →</div>
       </button>
       <button class="role-card" data-role="proveedor" type="button">
+        <svg class="role-scene" viewBox="0 0 260 96" aria-hidden="true" focusable="false">
+          <g class="rs-truck">
+            <rect x="26" y="46" width="58" height="24" rx="4" fill="rgba(31,182,205,0.18)" stroke="#1FB6CD" stroke-width="1.6"/>
+            <path d="M84 62 v-10 h16 l8 10 Z" fill="rgba(31,182,205,0.28)" stroke="#1FB6CD" stroke-width="1.6"/>
+            <circle class="rs-wheel" cx="44" cy="72" r="6" fill="#041820" stroke="#4FD8EC" stroke-width="2"/>
+            <circle class="rs-wheel" cx="92" cy="72" r="6" fill="#041820" stroke="#4FD8EC" stroke-width="2"/>
+          </g>
+          <path d="M10 88 h100" stroke="#0B6E88" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          <g class="rs-checklist">
+            <rect x="152" y="16" width="88" height="64" rx="6" fill="rgba(10,36,54,0.6)" stroke="#1FB6CD" stroke-width="1.4"/>
+            <line x1="162" y1="30" x2="204" y2="30" stroke="#84A9BB" stroke-width="2" stroke-linecap="round"/>
+            <g stroke="#4FD8EC" stroke-width="2.2" stroke-linecap="round" fill="none">
+              <path class="rs-check rs-check1" d="M162 44 l4 4 l8 -9"/>
+              <path class="rs-check rs-check2" d="M162 58 l4 4 l8 -9"/>
+              <path class="rs-check rs-check3" d="M162 72 l4 4 l8 -9"/>
+            </g>
+            <g stroke="#84A9BB" stroke-width="2" stroke-linecap="round" opacity="0.7">
+              <line x1="180" y1="45" x2="230" y2="45"/><line x1="180" y1="59" x2="230" y2="59"/><line x1="180" y1="73" x2="230" y2="73"/>
+            </g>
+          </g>
+        </svg>
         <div class="rc-icon">🚚</div>
         <div class="rc-name">Proveedor</div>
         <div class="rc-desc">Corralón, ferretería o casa de piscinas: qué están comprando los constructores y cómo ofrecer mis ofertas.</div>
@@ -159,8 +217,8 @@
       <div class="card">
         <h2>2 · Medidas y profundidad</h2>
         <div class="form-row">
-          <label>Largo <span class="unit">m</span> <input type="range" id="clL" min="3" max="12" step="0.5" value="8" oninput="document.getElementById('clLv').textContent=this.value+' m'"></label>
-          <label>Ancho <span class="unit">m</span> <input type="range" id="clW" min="2" max="6" step="0.5" value="4" oninput="document.getElementById('clWv').textContent=this.value+' m'"></label>
+          <label>Largo <span class="unit">m</span> <input type="range" id="clL" min="3" max="12" step="0.5" value="8"></label>
+          <label>Ancho <span class="unit">m</span> <input type="range" id="clW" min="2" max="6" step="0.5" value="4"></label>
         </div>
         <div style="display:flex;justify-content:space-between;margin:-0.5rem 0 0.8rem;color:var(--aqua-bright);font-weight:700">
           <span id="clLv">8 m</span><span id="clWv">4 m</span>
@@ -463,6 +521,8 @@
   <section id="tab-results" class="tab-panel">
     <div class="card">
       <h2>Geometría y volumen</h2>
+      <!-- momento firma (estándar §7.1-9): la pileta se llena con TU volumen -->
+      <div id="fillScene" class="fill-scene" role="img"></div>
       <div id="resGeo" class="kpi-grid"></div>
       <div id="geoBreakdown"></div>
     </div>
@@ -885,6 +945,10 @@
     </div>
     <div class="card">
       <h2>Términos de uso y privacidad</h2>
+      <p class="hint">Resumen acá adentro · documentos completos como páginas servibles:
+        <a href="terminos.html" target="_blank" rel="noopener noreferrer">Términos y condiciones</a> ·
+        <a href="privacidad.html" target="_blank" rel="noopener noreferrer">Política de privacidad</a>
+      </p>
       <details>
         <summary>Términos y condiciones de uso</summary>
         <p class="hint">ObraAcuática es una herramienta de estimación y proyecto para la construcción de piletas. Los cálculos (materiales, hidráulica, estructura, presupuesto) son <b>orientativos</b>: el proyecto ejecutivo y la seguridad estructural deben ser verificados y firmados por un profesional matriculado. Los precios de referencia tienen fecha de vigencia y varían por zona y proveedor. El usuario es responsable del uso final de la información generada. Las formulaciones de fábrica incluidas en la versión del dueño son confidenciales y de exclusiva propiedad del titular.</p>
@@ -903,7 +967,10 @@
 </main>
 
 <footer>
-  <p>ObraAcuática · Estudio de fabricación y construcción de piletas · Christian Osvaldo Hillkirk Gane · Datos técnicos: manuales propios + estándar del rubro · Verificar cálculo estructural final por ingeniería matriculado.</p>
+  <p>ObraAcuática · Estudio de fabricación y construcción de piletas · Christian Osvaldo Hillkirk Gane · Datos técnicos: manuales propios + estándar del rubro · Verificar cálculo estructural final por ingeniería matriculado. ·
+    <a href="terminos.html" target="_blank" rel="noopener noreferrer">Términos</a> ·
+    <a href="privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a>
+  </p>
   <p class="red-apicus">de la red Apicus —
     <a href="https://obracuatica.pages.dev/?ref=red" title="Estás en ObraAcuática">ObraAcuática</a> ·
     <a href="https://turno-blindado.pages.dev/?ref=red" target="_blank" rel="noopener noreferrer" title="Turnos online con agenda propia">Turno Blindado</a> ·
@@ -911,20 +978,20 @@
   </p>
 </footer>
 
-<script src="data.js?v=4.3"></script>
-<script src="dialogos.js?v=4.3"></script>
-<script src="medir.js?v=4.3"></script>
-<script src="cobro.js?v=4.3"></script>
-<script src="protocols.js?v=4.3"></script>
-<script src="engine.js?v=4.3"></script>
-<script src="planos.js?v=4.3"></script>
-<script src="ilustraciones.js?v=4.3"></script>
-<script src="obra.js?v=4.3"></script>
-<script src="proveedores.js?v=4.3"></script>
-<script src="ia.js?v=4.3"></script>
-<script src="sec-core.js?v=4.3"></script>
-<script src="auth.js?v=4.3"></script>
-<script src="enterprise.js?v=4.3"></script>
-<script src="ui.js?v=4.3"></script>
+<script src="data.js?v=4.4"></script>
+<script src="dialogos.js?v=4.4"></script>
+<script src="medir.js?v=4.4"></script>
+<script src="cobro.js?v=4.4"></script>
+<script src="protocols.js?v=4.4"></script>
+<script src="engine.js?v=4.4"></script>
+<script src="planos.js?v=4.4"></script>
+<script src="ilustraciones.js?v=4.4"></script>
+<script src="obra.js?v=4.4"></script>
+<script src="proveedores.js?v=4.4"></script>
+<script src="ia.js?v=4.4"></script>
+<script src="sec-core.js?v=4.4"></script>
+<script src="auth.js?v=4.4"></script>
+<script src="enterprise.js?v=4.4"></script>
+<script src="ui.js?v=4.4"></script>
 </body>
 </html>

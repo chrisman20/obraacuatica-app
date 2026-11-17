@@ -162,6 +162,43 @@ check("health endpoint presente", read("functions/api/health.js").includes("ok: 
   check("tote-r3: preferencia fail-closed sin envs de precio/moneda (503 SIMULADO_INACTIVO)", (pref.match(/SIMULADO_INACTIVO/g) || []).length >= 3);
   check("tote-r3: preferencia valida whitelist de plan (sin default silencioso)", pref.includes('PLANS_OK = ["pro", "white"]'));
 })();
+
+// ── OLA P1 (17/11): CSP sin unsafe-inline + backup rotativo + fixes de wiring ──
+;(function(){
+  const front = ["data.js", "dialogos.js", "medir.js", "cobro.js", "protocols.js", "engine.js",
+    "planos.js", "ilustraciones.js", "obra.js", "proveedores.js", "ia.js", "sec-core.js",
+    "auth.js", "enterprise.js", "ui.js"].map(read).join("\n");
+  const index = read("index.html");
+  const headers = read("_headers");
+  const auth = read("auth.js");
+  const ui = read("ui.js");
+
+  // P1 del pase: eliminar unsafe-inline de script-src (11 handlers inline → listeners)
+  check("ola-p1: CSP meta sin unsafe-inline en script-src", /script-src 'self'[^;]*'unsafe-inline'/.test(index) === false && index.includes("script-src 'self'"));
+  check("ola-p1: CSP _headers sin unsafe-inline en script-src", /script-src 'self'[^;]*'unsafe-inline'/.test(headers) === false && headers.includes("script-src 'self'"));
+  const inlineHandlers = (index + front).match(/\son(click|error|load|change|input|submit|mouseover)\s*=/g) || [];
+  check("ola-p1: cero handlers inline en el front (delegación/listeners)", inlineHandlers.length === 0, JSON.stringify(inlineHandlers.slice(0, 5)));
+  check("ola-p1: delegación global de modales (✕ + fondo + Escape)", read("enterprise.js").includes('closest(".prov-close")') && /Escape[\s\S]{0,120}prov-modal/.test(read("enterprise.js")));
+  check("ola-p1: fallback de fotos del hero por delegación (antes onerror inline)", ui.includes("data-ill-fallback") && ui.includes('addEventListener("error"'));
+
+  // fix: botón "Agregar proveedor local" muerto (Proveedores.add no expuesto)
+  check("ola-p1: Proveedores.add expuesto (botón de agregar proveedor vivo)", read("proveedores.js").includes("add: addLocal"));
+
+  // fix: instrumentación nunca inicializada
+  const medir = read("medir.js");
+  check("ola-p1: auto-arranque de instrumentación (sentry/turnstile/replay)", /DOMContentLoaded[\s\S]{0,220}Medir\.sentry\(\)/.test(medir) && medir.includes("Medir.replay();"));
+  check("ola-p1: replay OFF sin flag (dos señales para encender)", medir.includes("posthogReplay") && medir.includes("on !== true"));
+
+  // backup rotativo + restauración ensayada (regla 12 nivel 4)
+  check("ola-p1: backup rotativo FIFO expuesto (guardar/listar/restaurar)", auth.includes("rotarGuardar") && auth.includes("rotarListar") && auth.includes("rotarRestaurar"));
+  check("ola-p1: rotativo acotado a 3 y NO auto-incluido en backups", auth.includes("ROT_MAX = 3") && auth.includes("obracuatica_backup_rot") && !auth.includes('"piletalab_backup_rot"'));
+  check("ola-p1: el export del admin también rota copia local", ui.includes("Auth.rotarGuardar(enc)"));
+  check("ola-p1: restauración del histórico exige passphrase (GCM autentica)", ui.includes("rotarRestaurar(parseInt"));
+  check("ola-p1: test de restauración ensayada existe", exists("tests/e2e-backup.mjs"));
+
+  // legal servible también detrás del perímetro
+  check("ola-p1: páginas legales sin scripts propios (estáticas puras)", !/<script/.test(read("terminos.html")) && !/<script/.test(read("privacidad.html")));
+})();
 // ---------- RESULTADO ----------
 
 if (failures) {

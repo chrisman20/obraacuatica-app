@@ -102,3 +102,75 @@ RE-TEST: 4 gates EXIT=0 (redirect + $? real) + 7/7 casos de simulación
 push, el HEAD NUEVO se re-gatea — nadie hereda un "verde" de otro commit;
 (2) en dinero, precio y moneda tienen UNA fuente (env) y toda ausencia es
 fail-closed — un default cómodo (USD, 15) es una bomba con fecha.
+
+## OLA P1 (17/11/2026) — la ola post-pase: 38,5/40 mecánico → 40/40 con TODO verde
+
+**Qué ejecutó (P1 del pase + estándares, sin credenciales):**
+1. **ASSETS §7 restantes:** splash iOS 750/1170/1290/2048 (generadas con
+   `tools/gen-splash.js`, Node puro: SDF + encoder PNG propio — certificadas
+   visualmente por agente con visión; la A salió tenue al primer intento →
+   reescrita con cápsulas) · escenas hero animadas por rol (cliente/pro/proveedor,
+   keyframes propios, apagadas por reduced-motion) · vacío ilustrado de proyectos
+   (antes la card se OCULTABA: vacío invisible) · momento firma: en Resultados el
+   corte de la pileta SE LLENA con el volumen recién calculado (aria-label con
+   dato vivo: "30,6 metros cúbicos").
+2. **LEGAL servible:** terminos.html + privacidad.html como páginas propias
+   (estáticas puras, cero scripts) + links en tab Planes y footer + SW shell.
+3. **A11Y del GATE-ACCESIBILIDAD:** A2 aria-label en icon-buttons (3 topbar +
+   prov-close generados) · A5 contraste MEDIDO programáticamente en el smoke-ui
+   (6 pares WCAG ≥ 4,5:1) · prueba 375px en navegador REAL (viewport 375×667:
+   overflow-x 0, tabs legibles, CTAs apilados; visión certificó "profesional";
+   mejora táctil aplicada: tabs min-height 40px) · modales .prov-modal ahora
+   también cierran con Escape (A7 completo).
+4. **P1 del pase — eliminar unsafe-inline de script-src:** 13 handlers inline
+   removidos (3 topbar + 7 templates + 1 onerror + 2 oninput) → listeners y
+   delegación global; CSP meta y _headers quedan `script-src 'self'` LIMPIO.
+5. **INSTRUMENTACIÓN:** PostHog session replay cableado e inactivo por diseño
+   (flag `posthogReplay` + key) — y fix grave: **Sentry/Turnstile jamás se
+   inicializaban** (existían pero nadie los llamaba): auto-arranque agregado.
+6. **OPERACIÓN:** backup rotativo local FIFO-3 (cada backup exportado deja copia
+   cifrada restaurable sin archivo) + `tests/e2e-backup.mjs`: restauración
+   ENSAYADA con el código real (19 checks: export→cifrar→rotar→perder→restaurar,
+   passphrase mala = fail-closed, pérdida total recuperada por re-registro).
+7. **PRODUCTO regla 16:** ESPECIFICACION-APP.md con la ficha del competidor
+   hipotético (C1-C10: dónde nos destroza, dónde el competidor gana y no es
+   primera compra) + plan de foso (4/5 materiales encendidos) + vecinas.
+8. **VERSIONADO:** CHANGELOG.md (histórico v4.1→v4.4) + `window.APP_VERSION`
+   como fuente única (medir.js decía "4.1" con la app en 4.3 — incoherencia
+   regla 18 cazada) + tag git v4.4.0.
+
+**Bugs hallados y cerrados en la ola (nadie los veía):**
+- "➕ Agregar proveedor local" llamaba `Proveedores.add` NO expuesto → botón
+  muerto en producción. Fix + check permanente.
+- Los labels de los sliders del asistente cliente vivían SOLO en oninput inline.
+- Sentry/Turnstile sin disparador (arriba).
+
+**i18n PT del nicho NEA: NO ejecutado** — el criterio del catálogo es "solo si
+la app ya tiene i18n" y esta app no lo tiene (declarado P2 desde el pase).
+
+**Gates de cierre (corridos en la sesión, todos EXIT=0):**
+smoke-seguridad (133 ok) · smoke-ui (68 ok) · smoke-contenido (66 ok/0 fail) ·
+e2e-corazon (16/16) · e2e-backup (19/19, NUEVO) + E0 vivo re-corrido en
+navegador real con CSP estricta (CTA→config, momento firma, vacío ilustrado,
+slider cliente rol cliente, Health abre y Escape cierra).
+
+### Línea KAIZEN (TOTE de la ola)
+TEST: el primer splash generado salió con la A del monograma casi invisible
+(certificación visual por agente). INTERVENCIÓN: reescribir la A con CÁPSULAS
+(segmento+radio: trazo parejo por construcción) en vez de máscara SDF anidada.
+RE-TEST: visión certificó "trazo tan visible como el del anillo". Lección: con
+arte generativo, las formas compuestas por primitivas PAREJAS (cápsula, anillo)
+superan a las máscaras anidadas — y la certificación visual es la que manda,
+no el código que "debería" salir bien. Además: el grep inicial de handlers
+inline no incluía `oninput=` — el CHECK NUEVO del smoke cazó 2 más; el gate
+mejoró al ojo del constructor (regla: el check escrito supera al grep manual).
+
+### Test del orgullo
+**La firmo.** Esta ola convirtió detalles en oficio: la pileta que se llena con
+TU volumen es el instante que un piletero le muestra al cliente en el celular;
+el splash y las escenas por rol hacen que la app parezca lo que es (una
+herramienta de estudio, no una plantilla); el backup rotativo con restauración
+ensayada es la diferencia entre "tiene backup" y "SE PUEDE recuperar"; y la CSP
+sin unsafe-inline es el perímetro que el pase dejó como P2 y hoy está cerrado.
+Lo que NO firmo: el cobro real (sigue esperando el link de MP del dueño) y el
+deploy productivo — VENDIBLE-CANDIDATO mantiene su condición exacta.

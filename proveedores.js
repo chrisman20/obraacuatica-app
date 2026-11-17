@@ -115,9 +115,9 @@ const Proveedores = (() => {
       p.cat === catId && (p.km == null || parseFloat(p.km) <= (zone.km || 30)));
 
     const html = `
-    <div class="prov-modal" onclick="if(event.target===this) Proveedores.close()">
+    <div class="prov-modal">
       <div class="prov-box">
-        <button class="prov-close" onclick="Proveedores.close()">✕</button>
+        <button class="prov-close" aria-label="Cerrar ventana" type="button">✕</button>
         <h3>${cat.icon} ¿Dónde consigo <span class="aqua">${itemName || "este rubro"}</span>?</h3>
         <p class="prov-zone">📍 ${zone.prov || "elegí tu provincia"}${zone.city ? " · " + zone.city : ""} · radio ${zone.km || 30} km ${zone.prov ? "" : "(configuralo arriba)"}</p>
 
@@ -127,11 +127,11 @@ const Proveedores = (() => {
               <div><b>${Sec.escapeHtml(p.name)}</b>${p.km != null ? ` <span class="tag aqua">a ${p.km} km</span>` : ' <span class="tag">envío/online</span>'}${p.city ? ` <small style="color:var(--muted)">· ${Sec.escapeHtml(p.city)}</small>` : ""}</div>
               <div>
                 ${p.phone ? `<a class="btn mini" href="${waURL(p.phone)}" target="_blank">WhatsApp</a>` : ""}
-                <button class="btn mini danger" onclick="Proveedores.remove(${p._i},'${catId}')">borrar</button>
+                <button class="btn mini danger" data-pv-del="${p._i}|${catId}" type="button">borrar</button>
               </div>
             </div>`).join("")
           : `<p class="prov-empty">Todavía no agregaste proveedores locales de esta categoría. Agregá los tuyos una vez y quedan para siempre.</p>`}
-          <button class="btn" onclick="Proveedores.add('${catId}')">➕ Agregar proveedor local</button>
+          <button class="btn" data-pv-add="${catId}" type="button">➕ Agregar proveedor local</button>
         </div>
 
         ${opts.chains.length ? `<div class="prov-sec"><h4>Cadenas y opciones según tu zona</h4>
@@ -162,11 +162,24 @@ const Proveedores = (() => {
     </div>`;
     closeModal();
     document.body.insertAdjacentHTML("beforeend", html);
+    // wire por delegación local (P1 CSP: sin onclick inline). El fondo y el ✕
+    // los cierra la delegación global de enterprise.js.
+    const abiertos = document.querySelectorAll(".prov-modal");
+    const m = abiertos[abiertos.length - 1];
+    if (m) {
+      m.querySelectorAll("[data-pv-del]").forEach(b => b.addEventListener("click", () => {
+        const [idx, cat] = b.dataset.pvDel.split("|");
+        Proveedores.remove(parseInt(idx, 10), cat);
+      }));
+      m.querySelectorAll("[data-pv-add]").forEach(b => b.addEventListener("click", () => Proveedores.add(b.dataset.pvAdd)));
+    }
   }
 
   function closeModal() {
     document.querySelectorAll(".prov-modal").forEach(m => m.remove());
   }
 
-  return { renderZone, openModal, closeModal, close: closeModal, addLocal, remove: removeLocal, mapsURL, mlURL };
+  // add: alias histórico (el onclick viejo ya llamaba Proveedores.add — estaba
+  // ROTO porque no se exponía; fix de esta ola, ver PEDIDOS)
+  return { renderZone, openModal, closeModal, close: closeModal, add: addLocal, addLocal, remove: removeLocal, mapsURL, mlURL };
 })();

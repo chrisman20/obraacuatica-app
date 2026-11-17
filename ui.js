@@ -108,7 +108,7 @@ const UI = (() => {
     const t = POOL_TYPES.find(p => p.id === typeId) || POOL_TYPES[0];
     const art = $("heroArt");
     art.innerHTML = PHOTOS[typeId]
-      ? `<img src="${PHOTOS[typeId]}" alt="${t.name}" onerror="this.outerHTML=Ilustracion.tipo('${typeId}')"><div class="hero-photo-veil"></div>`
+      ? `<img src="${PHOTOS[typeId]}" alt="${t.name}" data-ill-fallback="${typeId}"><div class="hero-photo-veil"></div>`
       : Ilustracion.tipo(typeId);
     $("heroName").textContent = t.name;
     $("heroDesc").textContent = t.desc;
@@ -172,6 +172,53 @@ const UI = (() => {
 
   function renderResults() {
     const { cfg, geo, hyd, mat } = STATE;
+
+    // momento firma (estándar §7.1-9): el corte de la pileta SE LLENA con el
+    // volumen recién calculado — el instante que se comparte. Reinicia en cada
+    // recálculo (innerHTML nuevo = animación nueva).
+    (() => {
+      const host = $("fillScene");
+      if (!host) return;
+      const vol = E.fmt(geo.volume);
+      host.setAttribute("aria-label", `Corte de la pileta llenándose: ${vol} metros cúbicos de agua`);
+      host.innerHTML = `
+      <svg viewBox="0 0 320 132" aria-hidden="true" focusable="false">
+        <defs>
+          <clipPath id="fsClip"><path d="M64 30 L256 30 L256 106 Q256 112 250 112 L70 112 Q64 112 64 106 Z"/></clipPath>
+          <linearGradient id="fsWater" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="rgba(79,216,236,0.55)"/>
+            <stop offset="1" stop-color="rgba(11,110,136,0.75)"/>
+          </linearGradient>
+        </defs>
+        <line x1="12" y1="30" x2="64" y2="30" stroke="#84A9BB" stroke-width="2"/>
+        <line x1="256" y1="30" x2="308" y2="30" stroke="#84A9BB" stroke-width="2"/>
+        <g stroke="#0B6E88" stroke-width="1" opacity="0.5">
+          <path d="M20 30 l-7 8 M32 30 l-7 8 M44 30 l-7 8 M56 30 l-7 8"/>
+          <path d="M268 30 l7 8 M280 30 l7 8 M292 30 l7 8 M304 30 l7 8"/>
+        </g>
+        <g clip-path="url(#fsClip)">
+          <g class="fs-rise">
+            <rect x="64" y="30" width="192" height="84" fill="url(#fsWater)"/>
+            <g class="fs-wave-g">
+              <path class="fs-wave" d="M56 30 q13 -5 26 0 t26 0 t26 0 t26 0 t26 0 t26 0 t26 0 t26 0 t26 0 t26 0 v6 h-290 Z" fill="rgba(79,216,236,0.5)"/>
+            </g>
+            <g fill="rgba(232,246,250,0.65)">
+              <circle class="fs-bub fs-bub1" cx="120" cy="106" r="2.6"/>
+              <circle class="fs-bub fs-bub2" cx="176" cy="106" r="2"/>
+              <circle class="fs-bub fs-bub3" cx="210" cy="106" r="3.2"/>
+            </g>
+          </g>
+        </g>
+        <path d="M64 30 L256 30 L256 106 Q256 112 250 112 L70 112 Q64 112 64 106 Z" fill="none" stroke="#1FB6CD" stroke-width="2.4"/>
+        <line x1="64" y1="22" x2="256" y2="22" stroke="#4FD8EC" stroke-width="1.4"/>
+        <line x1="64" y1="18" x2="64" y2="26" stroke="#4FD8EC" stroke-width="1.4"/>
+        <line x1="256" y1="18" x2="256" y2="26" stroke="#4FD8EC" stroke-width="1.4"/>
+        <text x="160" y="16" text-anchor="middle" fill="#84A9BB" font-size="9" font-family="inherit">${cfg.fLen ?? ""} ${cfg.fLen ? "×" : ""} ${cfg.fWidth ?? ""} m</text>
+        <g class="fs-vol">
+          <text x="160" y="76" text-anchor="middle" fill="#E8F6FA" font-size="21" font-weight="800" font-family="var(--font-display, inherit)" style="font-variant-numeric: tabular-nums">${vol} m³</text>
+        </g>
+      </svg>`;
+    })();
 
     $("resGeo").innerHTML =
       kpi("Volumen", `${E.fmt(geo.volume)} m³`, `${geo.liters.toLocaleString("es-AR")} litros de agua`, true) +
@@ -740,7 +787,33 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
   function renderProjects() {
     const list = loadProjects();
     const card = $("pjListCard");
-    if (!list.length) { card.classList.add("hidden"); return; }
+    // vacío ILUSTRADO (estándar §7.1-6): el vacío enseña la salida, no se esconde
+    if (!list.length) {
+      card.classList.remove("hidden");
+      $("pjList").innerHTML = `
+        <div class="empty-state">
+          <svg class="empty-ill" viewBox="0 0 200 84" aria-hidden="true" focusable="false">
+            <rect x="18" y="18" width="86" height="54" rx="6" fill="rgba(31,182,205,0.08)" stroke="#1FB6CD" stroke-width="1.4"/>
+            <path d="M18 32 h32 l8 -9 h46" fill="none" stroke="#1FB6CD" stroke-width="1.4"/>
+            <rect x="32" y="41" width="54" height="21" rx="5" fill="none" stroke="#4FD8EC" stroke-width="1.6" stroke-dasharray="5 4"/>
+            <path d="M36 51.5 q7 -3 14 0 t14 0" fill="none" stroke="#4FD8EC" stroke-width="1.4" opacity="0.7"/>
+            <path class="es-dash" d="M112 64 q13 6 26 0" fill="none" stroke="#84A9BB" stroke-width="1.4" stroke-dasharray="3 5"/>
+            <g class="es-plus">
+              <circle cx="153" cy="44" r="17" fill="rgba(31,182,205,0.16)" stroke="#4FD8EC" stroke-width="1.8"/>
+              <path d="M153 35 v18 M144 44 h18" stroke="#4FD8EC" stroke-width="2.4" stroke-linecap="round"/>
+            </g>
+          </svg>
+          <p><b>Todavía no guardaste ningún proyecto.</b><br>
+          Configurá una pileta, ponele un nombre arriba (ej: <i>Pileta García</i>) y tocá <b>💾 Guardar proyecto</b>: queda en este navegador con su sistema constructivo, medidas y extras para retomarlo cuando quieras.</p>
+          <button class="btn" type="button" id="pjEmptyCta">📌 Guardar mi primer proyecto</button>
+        </div>`;
+      const cta = $("pjEmptyCta");
+      if (cta) cta.addEventListener("click", () => {
+        $("pjName").focus();
+        $("pjName").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      return;
+    }
     card.classList.remove("hidden");
     $("pjList").innerHTML = list.map(p => `
       <button class="chip" type="button" data-load="${p.id}" title="Guardado ${p.date}">
@@ -872,7 +945,12 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
         <tbody>${CLIENT_KIT.map(k => `<tr><td><b>${k.item}</b></td><td>${k.price ? E.fmtARS(k.price) : "según superficie"}</td><td style="color:var(--muted);font-size:0.8rem">${k.note}</td></tr>`).join("")}</tbody></table>`;
       ["clL", "clW", "clDepth", "clLights", "clHeat", "clInfinity"].forEach(id =>
         $(id).addEventListener("change", clienteCalc));
-      ["clL", "clW"].forEach(id => $(id).addEventListener("input", clienteCalc));
+      // labels de los sliders (antes oninput inline — P1 CSP)
+      ["clL", "clW"].forEach(id => $(id).addEventListener("input", () => {
+        const lab = $(id === "clL" ? "clLv" : "clWv");
+        if (lab) lab.textContent = $(id).value + " m";
+        clienteCalc();
+      }));
     }
     clienteCalc();
   }
@@ -1343,6 +1421,7 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
             <input type="file" id="adRestore" accept=".json" style="display:none">
           </label>
         </div>
+        <div id="rotBox" style="margin-top:0.7rem"></div>
         <p class="hint" id="adMsg" style="margin:0.5rem 0 0"></p>
       </div>` : ""}
     </div>`;
@@ -1413,8 +1492,10 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
         $("adminBox").innerHTML = `<table><thead><tr><th>Usuario</th><th>Email</th><th>Rol</th><th>Desde</th><th></th></tr></thead>
           <tbody>${L.users.map(x => `<tr>
             <td><b>${esc(x.name)}</b></td><td>${esc(x.email)}</td><td>${x.role === "dueño" ? "👑 dueño" : esc(x.role)}</td><td>${esc(x.created)}</td>
-            <td>${x.email !== u.email ? `<button class="btn mini danger" onclick="UI.adminDel('${esc(x.email)}')">quitar</button>` : "(vos)"}</td>
+            <td>${x.email !== u.email ? `<button class="btn mini danger" data-adm-del="${esc(x.email)}" type="button">quitar</button>` : "(vos)"}</td>
           </tr>`).join("")}</tbody></table>`;
+        $("adminBox").querySelectorAll("[data-adm-del]").forEach(b =>
+          b.addEventListener("click", () => adminDel(b.dataset.admDel)));
       };
       renderAdmin();
       window.UI_adminRender = renderAdmin;
@@ -1442,8 +1523,13 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
         a.href = URL.createObjectURL(blob);
         a.download = "piletalab-backup-CIFRADO-" + new Date().toISOString().slice(0, 10) + ".json.enc";
         a.click();
-        Sec.audit("backup_exportado", "AES-256-GCM");
-        $("adMsg").textContent = "💾 Backup CIFRADO descargado. Guardá la passphrase aparte del archivo.";
+        // 🕘 backup rotativo local: la MISMA copia cifrada queda en el histórico (FIFO 3)
+        const rot = Auth.rotarGuardar(enc);
+        Sec.audit("backup_exportado", "AES-256-GCM" + (rot.ok ? " +rotativo local" : ""));
+        $("adMsg").textContent = rot.ok
+          ? `💾 Backup CIFRADO descargado + copia local rotativa (${rot.kept}/${Auth.ROT_MAX}). Guardá la passphrase aparte del archivo.`
+          : "💾 Backup CIFRADO descargado (la copia local rotativa no pudo guardarse: " + rot.msg + ")";
+        renderRot();
       };
       $("adRestore").onchange = async e => {
         const f = e.target.files[0];
@@ -1468,6 +1554,40 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
           $("adMsg").textContent = "❌ Passphrase incorrecta o archivo inválido (el cifrado autentica el contenido).";
         }
       };
+
+      // 🕘 histórico rotativo local: listar + restaurar sin archivo
+      const renderRot = () => {
+        const boxR = $("rotBox");
+        if (!boxR) return;
+        const list = Auth.rotarListar();
+        if (!list.length) {
+          boxR.innerHTML = `<p class="hint" style="margin:0">🕘 <b>Copias locales rotativas:</b> ninguna todavía — al descargar tu próximo backup cifrado, la misma copia queda acá (se conservan las últimas ${Auth.ROT_MAX}, cifradas con tu passphrase).</p>`;
+          return;
+        }
+        boxR.innerHTML = `
+          <p class="hint" style="margin:0 0 0.5rem">🕘 <b>Copias locales rotativas cifradas</b> (las últimas ${Auth.ROT_MAX} — restaurables sin archivo, con la passphrase de cada una):</p>
+          <div class="next-step" style="justify-content:flex-start">
+            ${[...list].reverse().map(x => `<button class="btn mini" data-rot="${x.i}" type="button">🕘 ${new Date(x.when).toLocaleString("es-AR")}</button>`).join("")}
+          </div>`;
+        boxR.querySelectorAll("[data-rot]").forEach(b => b.addEventListener("click", async () => {
+          const resp = await Dialogos.pedir({
+            titulo: "🔐 Restaurar copia local",
+            texto: "Ingresá la passphrase con la que se cifró ESTA copia (GCM autentica: si no es exacta, no restaura).",
+            btnOk: "Restaurar",
+            campos: [{ label: "Passphrase", tipo: "password", ph: "passphrase de la copia" }]
+          });
+          if (!resp) return;
+          try {
+            const r = await Auth.rotarRestaurar(parseInt(b.dataset.rot, 10), resp[0]);
+            if (r.ok) { Sec.audit("backup_importado", "rotativo local"); $("adMsg").textContent = "✅ Copia local restaurada — recargando…"; setTimeout(() => location.reload(), 900); }
+            else $("adMsg").textContent = "❌ " + r.msg;
+          } catch (err) {
+            Sec.audit("backup_rechazado", "rotativo: passphrase incorrecta");
+            $("adMsg").textContent = "❌ Passphrase incorrecta (el cifrado autentica el contenido).";
+          }
+        }));
+      };
+      renderRot();
 
       // 🛡️ visor de auditoría (cadena hash verificable)
       const renderAudit = async () => {
@@ -1501,6 +1621,27 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
     syncFinishOptions();
     syncFilterOptions();
     renderInnovationChips();
+
+    // topbar: botones solo-ícono con aria-label (A2) y SIN onclick inline (P1: CSP sin unsafe-inline)
+    const topActions = {
+      btnTopHealth: () => Enterprise.Health.open(),
+      btnTopTests: () => Enterprise.SelfTest.run(),
+      btnTopTheme: () => Enterprise.Theme.toggle()
+    };
+    Object.entries(topActions).forEach(([id, fn]) => {
+      const b = $(id);
+      if (b) b.addEventListener("click", fn);
+    });
+
+    // fallback visual de fotos del hero por DELEGACIÓN en captura (antes onerror
+    // inline — P1 CSP): si una foto no carga, entra la viñeta ilustrada propia.
+    document.addEventListener("error", e => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement) || !img.dataset.illFallback) return;
+      const fb = document.createElement("div");
+      fb.innerHTML = Ilustracion.tipo(img.dataset.illFallback);
+      img.replaceWith(fb.firstChild);
+    }, true);
 
     const ids = ["fShape", "fLen", "fWidth", "fDepthMin", "fDepthMax", "fSolarium", "fSolW", "fUse",
       "fBorderType", "fTerrain", "fCopingType", "fFinish", "fWaste", "fBoxM2",

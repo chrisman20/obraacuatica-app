@@ -307,10 +307,42 @@ const Auth = (() => {
     } catch (e) { return { ok: false, msg: "JSON inválido." }; }
   }
 
+  /* ---------- backup ROTATIVO local (P1 operación) ----------
+     Cada backup exportado también deja copia local CIFRADA (la misma
+     passphrase del archivo descargado) en un histórico FIFO de 3: a la 4ª,
+     la más vieja se purga. Clave SIN prefijo piletalab_ para no
+     auto-incluirse en el próximo snapshot (el histórico no crece solo). */
+  const ROT_KEY = "obracuatica_backup_rot";
+  const ROT_MAX = 3;
+  function rotarGuardar(payloadCifrado) {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(ROT_KEY)) || []; } catch (e) { list = []; }
+    list.push({ when: new Date().toISOString(), payload: payloadCifrado });
+    while (list.length > ROT_MAX) list.shift();
+    try { localStorage.setItem(ROT_KEY, JSON.stringify(list)); }
+    catch (e) { return { ok: false, msg: "Sin espacio local para la copia rotativa." }; }
+    return { ok: true, kept: list.length };
+  }
+  function rotarListar() {
+    try {
+      return (JSON.parse(localStorage.getItem(ROT_KEY)) || []).map((x, i) => ({ i, when: x.when }));
+    } catch (e) { return []; }
+  }
+  async function rotarRestaurar(i, passphrase) {
+    if (!isAdmin()) return { ok: false, msg: "Solo el dueño." };
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem(ROT_KEY)) || []; } catch (e) { list = []; }
+    const entry = list[i];
+    if (!entry) return { ok: false, msg: "No existe esa copia del histórico." };
+    const data = await Sec.aesDecrypt(entry.payload, passphrase); // GCM autentica: pass mala = throw
+    return importAll(JSON.stringify(data.data));
+  }
+
   return { register, login, logout, current, isAdmin,
     begin2FA, confirm2FA, disable2FA,
     addPasskey, loginPasskey,
     totp, verifyTotp, otpauthURI,
     adminList, adminSetRole, adminRemove, exportAll, importAll,
+    rotarGuardar, rotarListar, rotarRestaurar, ROT_MAX,
     Sec };
 })();

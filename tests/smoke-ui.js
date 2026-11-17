@@ -107,6 +107,60 @@ check("términos y privacidad en la app", index.includes("Términos y condicione
 // 13) reduced-motion apaga los diálogos
 check("reduced-motion apaga dlg-box/dlg-toast", /prefers-reduced-motion: reduce[\s\S]{0,200}dlg-box/.test(styles));
 
+// 14) OLA P1 (17/11/2026): assets §7 restantes + GATE-ACCESIBILIDAD + legal servible
+// 14a) splash iOS (§7.1-3)
+const splashOk = ["splash-750.png", "splash-1170.png", "splash-1290.png", "splash-2048.png"]
+  .every(f => { try { return fs.statSync(path.join(appDir, f)).size > 8000; } catch (e) { return false; } });
+check("splash iOS 4 tamaños en repo (>8KB, arte generado)", splashOk);
+check("apple-touch-startup-image linkeado (4 media queries iOS)", (index.match(/apple-touch-startup-image/g) || []).length === 4);
+// 14b) escena hero animada por tipo de usuario (§7.1-5)
+check("escena hero por rol: 3 role-scene SVG (cliente/pro/proveedor)", (index.match(/class="role-scene"/g) || []).length === 3);
+check("escenas animadas con keyframes propios (rsDraw/rsPulse/rsHaul)", /@keyframes rs(Draw|Pulse|Haul)/.test(styles) && index.includes("rs-draw-pool"));
+check("escenas decorativas con aria-hidden (A8)", !/class="role-scene"(?![^>]*aria-hidden)/.test(index));
+// 14c) vacíos ilustrados (§7.1-6: el vacío con arte + salida)
+check("vacío ilustrado de proyectos (empty-state + CTA que sale del vacío)", ui.includes("empty-state") && ui.includes("pjEmptyCta") && styles.includes(".empty-ill"));
+// 14d) momento firma (§7.1-9)
+check("momento firma: la pileta se llena con el volumen (fillScene + fsRise)", index.includes('id="fillScene"') && ui.includes("fs-rise") && /@keyframes fsRise/.test(styles));
+// 14e) A2: todo botón solo-ícono con aria-label (o title)
+const btnSinLabel = [...index.matchAll(/<button\b([^>]*)>([^<]{0,24})<\/button>/g)].filter(m => {
+  const attrs = m[1], txt = m[2].replace(/&[a-z]+;/g, "").trim();
+  return txt.length > 0 && txt.length <= 3 && /[^\w\s]/.test(txt) && !/aria-label=/.test(attrs) && !/title=/.test(attrs);
+});
+check("A2: todo botón solo-ícono del HTML con aria-label o title", btnSinLabel.length === 0, JSON.stringify(btnSinLabel.map(m => m[2])));
+check("A2: prov-close generado con aria-label (modales JS)", read("enterprise.js").includes('prov-close" aria-label') && read("proveedores.js").includes('prov-close" aria-label'));
+// 14f) A5: contraste WCAG medido programáticamente (pares clave de la paleta)
+const root = (styles.match(/:root\s*\{([^}]*)\}/) || ["", ""])[1];
+const tok = n => (root.match(new RegExp("--" + n + ":\\s*(#[0-9A-Fa-f]{6})")) || [])[1];
+const lum = h => {
+  const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+    .map(v => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+};
+const ratio = (a, b) => { const [l1, l2] = [lum(a), lum(b)].sort((x, y) => y - x); return (l1 + 0.05) / (l2 + 0.05); };
+const PARES = [
+  ["texto principal --txt sobre --bg", tok("txt"), tok("bg")],
+  ["texto secundario --muted sobre --bg2 (peor caso cards)", tok("muted"), tok("bg2")],
+  ["texto de botón #041820 sobre --aqua (gradiente)", "#041820", tok("aqua")],
+  ["acentos --aqua-bright sobre --bg", tok("aqua-bright"), tok("bg")],
+  ["avisos --warn sobre --bg", tok("warn"), tok("bg")],
+  ["errores --bad sobre --bg", tok("bad"), tok("bg")]
+];
+for (const [nombre, a, b] of PARES) {
+  const r = a && b ? ratio(a, b) : 0;
+  check(`A5 contraste ≥ 4.5:1 — ${nombre}`, r >= 4.5, r.toFixed(2) + ":1 (" + a + " sobre " + b + ")");
+}
+// 14g) 375px: breakpoint específico móvil
+check("A10/375px: media query móvil dedicada en styles", /@media \(max-width:\s*390px\)/.test(styles));
+// 14h) legal como páginas servibles
+const term = exists("terminos.html") ? read("terminos.html") : "";
+const priv = exists("privacidad.html") ? read("privacidad.html") : "";
+check("legal servible: terminos.html con contenido real", term.includes("Términos y condiciones") && term.includes("profesional matriculado") && term.includes('href="privacidad.html"'));
+check("legal servible: privacidad.html con contenido real", priv.includes("Política de privacidad") && priv.includes("100% en tu navegador") && priv.includes('href="terminos.html"'));
+check("legal linkeado desde la app (tab Planes + footer)", index.includes('href="terminos.html"') && index.includes('href="privacidad.html"'));
+// 14i) instrumentación: replay cableado e inactivo por diseño (regla 13)
+check("PostHog session replay cableado e inactivo por diseño", medir.includes("posthogReplay") && read("data.js").includes("posthogReplay: false"));
+check("auto-arranque de instrumentación (sentry/turnstile/replay al cargar)", /DOMContentLoaded[\s\S]{0,220}Medir\.sentry\(\)/.test(medir) && medir.includes("Medir.replay();"));
+
 if (failures) {
   console.error("\nSMOKE UI: " + failures + " fallo(s). El diseño no se publica.");
   process.exit(1);

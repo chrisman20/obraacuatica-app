@@ -42,7 +42,8 @@ const CONFIG = {
   analytics: {                 // ← credenciales de instrumentación (vacías = inactivo por diseño)
     posthog: "",
     sentry: "",
-    turnstileSite: ""
+    turnstileSite: "",
+    posthogReplay: false      // replay de sesiones: enciende SOLO con posthog key + true (bandeja)
   }
 };
 
@@ -91,7 +92,8 @@ const Freemium = {
 
 /* Fotos reales por tipo (CC descargadas localmente — ver CREDITS-FOTOS.md).
    ?v= para cache-busting: cada release se bump junto con SW. */
-const IMG_V = "?v=4.3";
+const IMG_V = "?v=4.4";
+window.APP_VERSION = "4.4"; // fuente única de la versión de release (Sentry/medir.js la leen — regla 18)
 const PHOTOS = {
   hero: "img/hero.jpg" + IMG_V,
   arena: "img/arena.jpg" + IMG_V,
