@@ -31,6 +31,8 @@ const CLIENT_PHASE_DESC = {
    ------------------------------------------------------------ */
 const CONFIG = {
   whatsapp: "5493790000000",   // ← CAMBIAR por el real antes del deploy (bandeja del dueño)
+  WHATSAPP_NUMBER: "",         // ← SOPORTE del botón de auxilio (regla 24 §7): vacío = botón OCULTO
+                               //    (número de soporte de la casa — distinto del comercial de arriba)
   marca: "ObraAcuática",
   marcaCorta: "OA",
   dominio: "obracuatica.com",
@@ -92,8 +94,8 @@ const Freemium = {
 
 /* Fotos reales por tipo (CC descargadas localmente — ver CREDITS-FOTOS.md).
    ?v= para cache-busting: cada release se bump junto con SW. */
-const IMG_V = "?v=4.4";
-window.APP_VERSION = "4.4"; // fuente única de la versión de release (Sentry/medir.js la leen — regla 18)
+const IMG_V = "?v=4.5";
+window.APP_VERSION = "4.5"; // fuente única de la versión de release (Sentry/medir.js la leen — regla 18)
 const PHOTOS = {
   hero: "img/hero.jpg" + IMG_V,
   arena: "img/arena.jpg" + IMG_V,

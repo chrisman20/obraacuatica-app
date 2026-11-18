@@ -56,7 +56,7 @@ obracuatica/
 ├── splash-*.png    → splash iOS 4 tamaños (regenerar: node tools/gen-splash.js)
 ├── ESPECIFICACION-APP.md → competidor hipotético + foso + vecinas (regla 16/20/22)
 ├── CHANGELOG.md    → versiones del release (fuente única: APP_VERSION en data.js)
-├── tests/          → gates: smoke-seguridad + smoke-ui + smoke-contenido + e2e-corazon + e2e-backup
+├── tests/          → gates: smoke-seguridad + smoke-ui + smoke-contenido + smoke-funnel (regla 24) + e2e-corazon + e2e-backup
 └── ui.js           → render, tabs, chips, hero, localStorage de precios, CSV, planos
 ```
 

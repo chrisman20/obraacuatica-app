@@ -35,6 +35,10 @@ const UI = (() => {
   }
 
   /* ---------- tabs ---------- */
+  // REGLA 24 — embudo en vivo: Resultados (paso_2) y Presupuesto (paso_3) son
+  // pasos del flujo núcleo; re-entrar a Resultados sin exportar en la sesión
+  // es vuelta_paso_2 (rebote: vio números y volvió a mirarlos sin avanzar).
+  let vioResultados = false;
   function initTabs() {
     $("mainTabs").addEventListener("click", e => {
       const btn = e.target.closest("button[data-tab]");
@@ -44,6 +48,15 @@ const UI = (() => {
       // el circuito de cobro se refresca SIEMPRE al entrar a Planes (regla 21:
       // el panel nunca muestra un plan que ya no es — ni oculta el que sí es)
       if (btn.dataset.tab === "planes" && typeof Cobro !== "undefined") Cobro.renderGestion();
+      // REGLA 24: pasos del embudo al navegar el flujo núcleo
+      if (typeof Medir !== "undefined") {
+        if (btn.dataset.tab === "results") {
+          if (vioResultados && !(window.__medidos || []).includes("aha")) Medir.enviar("vuelta_paso_2");
+          vioResultados = true;
+          Medir.enviar("paso_2");
+        }
+        if (btn.dataset.tab === "budget") Medir.enviar("paso_3");
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
     $("goResults").addEventListener("click", () => {
@@ -1650,6 +1663,15 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
       "fLights", "fLadder", "fHeat", "fCover", "fShower", "fRobot"];
     ids.forEach(id => $(id).addEventListener("change", recalc));
     ids.forEach(id => $(id).addEventListener("input", recalc));
+    // REGLA 24 — paso_1 del embudo: el usuario configura su pileta (inputs del
+    // tab "1 · Configurá", los f*). Si ya vio Resultados y vuelve a tocarlos,
+    // es vuelta_paso_1: re-configura (rebote configurador↔resultados).
+    ids.filter(id => id.charAt(0) === "f").forEach(id =>
+      $(id).addEventListener("change", () => {
+        if (typeof Medir === "undefined") return;
+        if (vioResultados) Medir.enviar("vuelta_paso_1", { input: id });
+        Medir.enviar("paso_1");
+      }));
 
     $("btnChem").addEventListener("click", runChemCheck);
     $("pType").addEventListener("change", renderProtocols);
@@ -1723,6 +1745,23 @@ SALA DE MÁQUINAS (bajo nivel de agua, a menos de 6 m)
     // PWA: registrar service worker (solo en http/https)
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("sw.js").catch(() => { /* offline file:// o no soportado */ });
+    }
+
+    // REGLA 24 §7 — BOTÓN DE AUXILIO: flotante en toda pantalla; abre WhatsApp
+    // al soporte con contexto automático (app + versión + paso vigente). Sin
+    // WHATSAPP_NUMBER cargada (bandeja del dueño) queda OCULTO: inactivo por
+    // diseño (regla 13), jamás un número placeholder de soporte.
+    {
+      const aux = document.getElementById("btnAuxilio");
+      const num = aux && String(CONFIG.WHATSAPP_NUMBER || "").replace(/\D/g, "");
+      if (aux && num) {
+        aux.hidden = false;
+        aux.addEventListener("click", e => {
+          e.preventDefault();
+          const txt = (typeof Medir !== "undefined" && Medir.textoAuxilio) ? Medir.textoAuxilio() : "obracuatica: algo no anda: ";
+          window.open("https://wa.me/" + num + "?text=" + encodeURIComponent(txt), "_blank", "noopener");
+        });
+      }
     }
 
     recalc();

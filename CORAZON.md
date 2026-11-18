@@ -49,6 +49,25 @@ presupuesto firmable. Estado: v4.1.
   falla validada (input roto → aviso visible, cero NaN) + check repetible:
   `node tests/e2e-corazon.mjs` → 16/16 verde.
 
+## EMBUDO — ObraAcuática (regla 24, declarado 18/11/2026)
+
+El flujo núcleo real (el mismo del E0): abrir → configurar → resultados →
+presupuesto → export (el momento EUREKA) → plan Pro. Cableado en
+ui.js/cobro.js/auth.js vía medir.js; medidor inactivo sin credencial (regla 13
+— modo cobertura hasta la key de la bandeja; lo muerde `tests/smoke-funnel.js`).
+
+1. paso_1: configura su pileta (primer input del tab "1 · Configurá") → esperado ≥90% de los que abren
+2. paso_2: ve Resultados (volumen + hidráulica) → esperado ≥60%
+3. paso_3: ve el Presupuesto (rubros + llave en mano) → esperado ≥50%
+4. aha: primer export del mes (Excel/Word/MD/CSV/Odoo/PDF) → esperado ≥40% de los que ven resultados (la métrica reina)
+5. pago_start → pago_ok (checkout Pro/White; el ok nace en el webhook firmado) → esperado ≥8% de los aha
+
+Trancas que vigila el turno diario (§3): `vuelta_paso_1` (re-configura tras ver
+resultados), `vuelta_paso_2` (re-entra a Resultados sin exportar), `salida_paso_N`
+(se va con el paso vigente), `error_js` (capturador global, stack saneado sin
+PII), `pago_fail` (canje inválido / "Ya pagué" / sin backend). Botón de auxilio
+(§7) listo y oculto hasta `CONFIG.WHATSAPP_NUMBER` (bandeja del dueño).
+
 ---
 *Este archivo lo lee el hook gate-obras en CADA mensaje mientras se trabaja en la app.
 Si la promesa acá no es la real, corregirla YA — un corazón mentiroso es peor que uno ausente.*

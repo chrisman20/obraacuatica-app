@@ -93,7 +93,10 @@ const Cobro = (() => {
       expira = new Date(ms).toISOString();
     }
     escribir({ plan: planId, desde: Date.now(), expira, fuente: fuente || "manual" });
-    if (typeof Medir !== "undefined") Medir.enviar("pago", { plan: planId, fuente: fuente || "manual" });
+    // REGLA 24: pago_ok cuando el plan queda activo (la verdad del dinero nace
+    // en el webhook firmado — functions/api/cobro/webhook.js dispara el suyo
+    // server-side; este es el eco del canje/simulación que ve el navegador).
+    if (typeof Medir !== "undefined") Medir.enviar("pago_ok", { plan: planId, fuente: fuente || "manual" });
     return leer();
   }
   function desactivar() {
@@ -107,6 +110,7 @@ const Cobro = (() => {
     // P0 TOTE r1: "Ya pagué" JAMÁS activa el plan client-side (regla 21:
     // activación solo por webhook firmado / canje verificado server-side).
     // Guarda un reclamo visible y el plan sigue en su estado real.
+    if (typeof Medir !== "undefined") Medir.enviar("pago_fail", { motivo: "ya-pague", plan: planId }); // regla 24: fricción de pago real
     try {
       localStorage.setItem("obracuatica_reclamo_pago", JSON.stringify({ plan: planId, fecha: Date.now() }));
     } catch (e) { /* sin localStorage */ }
@@ -137,6 +141,7 @@ const Cobro = (() => {
       body: JSON.stringify({ codigo: cod })
     }).then(r => r.json()).then(j => {
       if (!j || !j.ok) {
+        if (typeof Medir !== "undefined") Medir.enviar("pago_fail", { motivo: "canje-invalido", plan: "n/a" }); // regla 24
         Dialogos.toast(j && j.error ? "X " + j.error : "Codigo invalido", "error");
         return { ok: false, error: (j && j.error) || "invalido" };
       }
@@ -145,6 +150,7 @@ const Cobro = (() => {
       if (typeof UI !== "undefined" && UI.renderPlanes) UI.renderPlanes();
       return { ok: true };
     }).catch(() => {
+      if (typeof Medir !== "undefined") Medir.enviar("pago_fail", { motivo: "sin-backend", plan: "n/a" }); // regla 24
       Dialogos.toast("Sin backend de cobro en este entorno - el canje corre en el deploy", "error");
       return { ok: false };
     });
@@ -206,6 +212,8 @@ const Cobro = (() => {
   function checkout(planId) {
     const p = planDe(planId);
     const activos = pagosActivos();
+    // REGLA 24: el checkout arrancado se mide SIEMPRE (modo real o simulado)
+    if (typeof Medir !== "undefined") Medir.enviar("pago_start", { plan: planId, modo: activos ? "mp" : "simulado" });
     const precio = precioDe(p);
     const incl = p.features.slice(0, 3).join(" · ");
     if (activos) {

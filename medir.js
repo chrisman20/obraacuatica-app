@@ -5,14 +5,34 @@
    = cero red, cero eventos, cero scripts cargados. Al dueño
    cargarlas (bandeja CUENTAS-CREDENCIALES-DUENO.md) el circuito
    se enciende sin refactor: jamás cambia el código del front.
-   Eventos: registro (cuenta creada) · aha (primer export)
-   · pago (plan activado). Sin email/nombre/teléfono en eventos:
-   id anónimo del navegador solamente.
+   REGLA 24 (17/11) — vocabulario de la casa, idéntico en todas:
+   paso_N (marca el paso vigente) · aha (primer export) · registro
+   (cuenta creada) · pago_start/pago_ok/pago_fail (checkout y su
+   resultado; el ok nace en el webhook firmado) · salida_paso_N
+   (se fue del flujo con un paso vigiente) · vuelta_paso_N
+   (reintento) · error_js (capturador global con stack saneado).
+   Sin credencial los eventos quedan en la cola local
+   (window.__medidos) y NADA sale del navegador (lo prueba el
+   gate tests/smoke-funnel.js corriendo este archivo en una VM).
+   Sin email/nombre/teléfono en eventos: id anónimo del
+   navegador solamente + app + versión.
    ============================================================ */
 
 const Medir = (() => {
   const KEY_ANON = "obracuatica_anon";
   const cfg = () => (typeof CONFIG !== "undefined" && CONFIG.analytics) || {};
+  try { window.__medidos = window.__medidos || []; } catch (e) { /* sin window */ }
+
+  /* ---------- REGLA 24: paso vigente + salida + etiquetas ---------- */
+  const PASOS = { 1: "Configurá", 2: "Resultados", 3: "Presupuesto" };
+  const esPaso = /^paso_(\d+)$/;
+  let pasoVigente = null;
+  const salidaYa = {};
+  function pasoActual() {
+    if (!pasoVigente) return null;
+    const n = parseInt(pasoVigente.slice(5), 10);
+    return { n: n, id: pasoVigente, texto: PASOS[n] || ("paso " + n) };
+  }
 
   function anon() {
     try {
@@ -27,14 +47,19 @@ const Medir = (() => {
 
   /* ---------- PostHog (capture API, sin SDK) ---------- */
   function enviar(evento, props) {
+    try { window.__medidos.push(evento); } catch (e) { /* cola local best-effort */ }
+    if (esPaso.test(evento)) pasoVigente = evento;    // regla 24: el paso dado marca el vigente
     const k = cfg().posthog;
     if (!k || !k.length) return;                 // sin credencial: no sale nada del navegador
     try {
       const body = JSON.stringify({
         api_key: k,
-        event: "oa_" + evento,
+        event: evento,                           // vocabulario idéntico en toda la casa (regla 24)
         distinct_id: anon(),
-        properties: props || {}
+        properties: Object.assign({
+          app: "obracuatica",
+          v: (typeof window !== "undefined" && window.APP_VERSION) || ""
+        }, props || {})
       });
       fetch("https://us.i.posthog.com/i/v0/e/", {
         method: "POST",
@@ -43,6 +68,44 @@ const Medir = (() => {
         keepalive: true
       }).catch(() => {});
     } catch (e) { /* nunca rompe la app */ }
+  }
+
+  /* ---------- REGLA 24 — salida_paso_N: la tranca silenciosa ----------
+     Se fue de la app (o a background) con un paso vigente => abandono en
+     ese paso. Una sola salida por paso (volver a entrar y avanzar resetea). */
+  function medirSalida() {
+    if (!pasoVigente || salidaYa[pasoVigente]) return;
+    salidaYa[pasoVigente] = true;
+    enviar("salida_" + pasoVigente);
+  }
+  window.addEventListener("beforeunload", medirSalida);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") medirSalida();
+  });
+
+  /* ---------- REGLA 24 — error_js: capturador global ----------
+     window.onerror + unhandledrejection al vocabulario de la casa (con
+     stack saneado: mensaje corto + archivo:línea, SIN datos personales). */
+  function errorJs(detalle) {
+    const d = String(detalle || "").replace(/\s+/g, " ").slice(0, 200);
+    enviar("error_js", { d: d });
+  }
+  window.addEventListener("error", e => {
+    errorJs(((e && e.message) || "error") + " @ " + String((e && e.filename) || "").split("/").pop() + ":" + ((e && e.lineno) || 0));
+  });
+  window.addEventListener("unhandledrejection", e => {
+    const r = e && e.reason;
+    errorJs((r && r.message) ? r.message : ((r && String(r)) || "promesa rechazada"));
+  });
+
+  /* ---------- REGLA 24 §7 — texto del BOTÓN DE AUXILIO ----------
+     El mensaje de WhatsApp llega con contexto automático: app, versión
+     (fuente única window.APP_VERSION) y el paso vigente con su etiqueta.
+     Lo completa el usuario ("algo no anda: "). */
+  function textoAuxilio() {
+    const v = (typeof window !== "undefined" && window.APP_VERSION) ? String(window.APP_VERSION) : "";
+    const p = pasoActual();
+    return "obracuatica v" + v + (p ? " · " + p.id + " (" + p.texto + ")" : "") + " · algo no anda: ";
   }
 
   /* ---------- Sentry (DSN cargado = activo) ---------- */
@@ -112,7 +175,7 @@ const Medir = (() => {
     window.posthog("session_replay", { name: "replay" });
   }
 
-  return { enviar, sentry, turnstile, turnstileToken, replay, anon };
+  return { enviar, sentry, turnstile, turnstileToken, replay, anon, pasoActual, textoAuxilio };
 })();
 
 /* auto-arranque (fix de esta ola): sentry/turnstile/replay se encendían

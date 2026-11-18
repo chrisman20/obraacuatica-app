@@ -80,6 +80,25 @@ export const onRequestPost = async ({ request, env }) => {
   const firma = (await hmacSha256Hex(MP_SECRET, payload)).slice(0, 16);
   const codigo = payload + "." + firma;
   console.log(JSON.stringify({ evento: "cobro_aprobado", email, monto: pago.transaction_amount, moneda: pago.currency_id, external: ref, codigo_canje: codigo }));
+
+  // REGLA 24 — pago_ok nace DONDE EL PAGO ES CIERTO: el webhook verificado
+  // (no el navegador). Sin POSTHOG_KEY en env no sale nada (regla 13).
+  // distinct_id = id del pago de MP: jamás el correo del pagador (sin PII
+  // en eventos — el email queda solo en el log de activación de arriba).
+  if (env.POSTHOG_KEY) {
+    try {
+      await fetch("https://us.i.posthog.com/i/v0/e/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          api_key: env.POSTHOG_KEY,
+          event: "pago_ok",
+          distinct_id: "mp-" + dataId,
+          properties: { app: "obracuatica", plan: planDePago, fuente: "webhook" }
+        })
+      }).catch(() => {});
+    } catch (e) { /* la estadística jamás rompe el cobro */ }
+  }
   return new Response(JSON.stringify({ ok: true, notas: "pago aprobado registrado; código de canje en el log" }), { status: 200, headers });
 };
 

@@ -3,6 +3,33 @@
 Formato: versiones del release (SW/`?v=`) con su ola. La fuente única de la versión
 es `data.js` → `window.APP_VERSION` + `sw.js` CACHE + `?v=` de index (regla 18).
 
+## v4.5.0 — OLA REGLA 24: estadísticas de uso (18/11/2026)
+
+### Embudo (PROTOCOLO-ESTADISTICAS-DE-USO.md)
+- **EMBUDO declarado en CORAZON.md** (5 pasos con umbrales): config (paso_1 ≥90%)
+  → resultados (paso_2 ≥60%) → presupuesto (paso_3 ≥50%) → **aha** = primer
+  export (≥40%) → pago_start→pago_ok (≥8%).
+- **Vocabulario de la casa completo** en el front: `paso_1/2/3` · `vuelta_paso_1/2`
+  (rebotes reales del flujo) · `salida_paso_N` (beforeunload + visibilitychange) ·
+  `error_js` (capturador global con stack saneado a 200 chars, sin PII) ·
+  `pago_start/pago_ok/pago_fail` (el evento viejo `pago` se reemplaza; el `pago_ok`
+  nace TAMBIÉN server-side en el webhook firmado, con guard `POSTHOG_KEY`).
+- **Eventos sin prefijo y con `app`+`v` como props** — vocabulario idéntico en
+  toda la casa; sin key de PostHog los eventos quedan en `window.__medidos`
+  (cola local) y NADA sale del navegador (regla 13, lo muerde el gate).
+
+### Botón de auxilio (§7)
+- Flotante 🛟 en toda pantalla: abre WhatsApp al soporte con mensaje pre-cargado
+  `obracuatica v4.5 · paso_N (<paso>) · algo no anda: ...` (contexto automático:
+  app + versión fuente única + paso vigente). **OCULTO sin
+  `CONFIG.WHATSAPP_NUMBER`** (número de soporte, separado del comercial; bandeja
+  del dueño — PENDIENTES fila 7).
+
+### Gate permanente
+- `tests/smoke-funnel.js` (§6 a-e): vocabulario cableado + capturador + cero
+  network sin key (VM con fetch espiado + mordida con key sembrada) + embudo
+  declarado + auxilio. 25 ok · EXIT 0. SW bump v4.4 → v4.5.
+
 ## v4.4.0 — OLA P1 post-pase (17/11/2026)
 
 ### Assets (estándar §7)

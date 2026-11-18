@@ -174,3 +174,40 @@ ensayada es la diferencia entre "tiene backup" y "SE PUEDE recuperar"; y la CSP
 sin unsafe-inline es el perímetro que el pase dejó como P2 y hoy está cerrado.
 Lo que NO firmo: el cobro real (sigue esperando el link de MP del dueño) y el
 deploy productivo — VENDIBLE-CANDIDATO mantiene su condición exacta.
+
+## OLA REGLA 24 — estadísticas de uso: embudo + capturador + auxilio (18/11/2026)
+
+**Qué se decidió (defaults de la casa, sin preguntar):**
+- **Embudo real (5 pasos):** config (paso_1, ≥90%) → resultados (paso_2, ≥60%)
+  → presupuesto (paso_3, ≥50%) → aha = primer export (≥40%, métrica reina) →
+  pago_start→pago_ok (≥8%). Declarado en CORAZON.md; cableado en ui.js/cobro.js.
+- **pago_ok tiene DOS nacimientos a propósito:** el webhook firmado (server-side,
+  donde el pago es cierto — patrón turno-blindado, con guard `env.POSTHOG_KEY`)
+  y el eco del canje/simulación en el navegador (fuente viaja en la prop para
+  no mezclarlos). El webhook usa `distinct_id: "mp-<id de pago>`" — jamás el
+  correo del pagador (sin PII en eventos).
+- **El evento `pago` (viejo, propio) se REEMPLAZA por `pago_ok`** del
+  vocabulario §1 — el vocabulario es idéntico en toda la casa (regla 24); se
+  quitó el prefijo `oa_` de los eventos por la misma razón (la app viaja como
+  prop `app`, no como prefijo).
+- **Botón de auxilio con número de SOPORTE separado** (`CONFIG.WHATSAPP_NUMBER`)
+  del comercial (`CONFIG.whatsapp`, placeholder): el auxilio NUNCA abre un
+  placeholder — vacío = botón oculto (regla 13), fila 7 en PENDIENTES.
+- **vuelta_paso_2 = re-entrar a Resultados sin exportar en la sesión** (rebote
+  medible contra `window.__medidos`); vuelta_paso_1 = re-configurar tras ver
+  resultados. Definiciones honestas del flujo de ESTA app, no calcos.
+- **SW bump v4.4 → v4.5** (regla 18: el usuario viejo no queda con el JS viejo).
+
+### Línea KAIZEN (Act de la ola)
+TEST: EMBUDOS-DEL-PARQUE tenía la app 🟡 2/3 — el evento `pago` no era del
+vocabulario y no existían pasos/salidas/vueltas ni capturador; sin embudo
+declarado no había estadística posible. INTERVENCIÓN: vocabulario completo +
+EMBUDO en CORAZON.md + capturador + auxilio + gate permanente con mordida
+(medir.js corrido en VM: sin key cero fetch — verificado con `llamadas.length
+=== 0`; con key sembrada el evento SALE). RE-TEST:
+`node tests/smoke-funnel.js` → 25 ok · EXIT 0, y la app pasa a 🟢 3/3 en
+EMBUDOS-DEL-PARQUE. Lección: el check de la VM muerde MEJOR que el grep — el
+primer corrido del smoke falló en un patrón de comillas (`'salida_'` vs
+`"salida_"`) que un grep manual habría dado por bueno; y la mordida con key
+sembrada prueba que el modo vivo no nace muerto (el auto-arranque de la ola P1
+ya nos había enseñado eso).

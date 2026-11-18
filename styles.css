@@ -2244,3 +2244,19 @@ kbd {
   .dlg-toast { transition: none; }
 }
 
+
+/* ── BOTÓN DE AUXILIO (regla 24 §7): flotante, discreto, toda pantalla ──
+   Sin CONFIG.WHATSAPP_NUMBER queda hidden (inactivo por diseño, regla 13);
+   el atributo manda por encima del display de la clase. */
+.btn-auxilio {
+  position: fixed; right: 18px; bottom: 18px; z-index: 60;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 16px; border-radius: 999px;
+  font: 600 0.82rem/1 inherit; letter-spacing: 0.02em;
+  color: #06222B; text-decoration: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--aqua-bright), var(--aqua));
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 20px rgba(31, 182, 205, 0.35);
+}
+.btn-auxilio:hover { filter: brightness(1.08); }
+.btn-auxilio[hidden] { display: none !important; }

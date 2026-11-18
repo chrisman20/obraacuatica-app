@@ -33,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=4.4">
+<link rel="stylesheet" href="styles.css?v=4.5">
 </head>
 <body data-app="obracuatica">
 
@@ -978,20 +978,27 @@
   </p>
 </footer>
 
-<script src="data.js?v=4.4"></script>
-<script src="dialogos.js?v=4.4"></script>
-<script src="medir.js?v=4.4"></script>
-<script src="cobro.js?v=4.4"></script>
-<script src="protocols.js?v=4.4"></script>
-<script src="engine.js?v=4.4"></script>
-<script src="planos.js?v=4.4"></script>
-<script src="ilustraciones.js?v=4.4"></script>
-<script src="obra.js?v=4.4"></script>
-<script src="proveedores.js?v=4.4"></script>
-<script src="ia.js?v=4.4"></script>
-<script src="sec-core.js?v=4.4"></script>
-<script src="auth.js?v=4.4"></script>
-<script src="enterprise.js?v=4.4"></script>
-<script src="ui.js?v=4.4"></script>
+<!-- BOTÓN DE AUXILIO (regla 24 §7): flotante en toda pantalla; abre WhatsApp al
+     soporte con contexto automático (app + versión + paso donde está el usuario).
+     OCULTO sin CONFIG.WHATSAPP_NUMBER cargada (inactivo por diseño, regla 13).
+     La lógica vive en ui.js (sin onclick inline: CSP sin unsafe-inline). -->
+<a id="btnAuxilio" class="btn-auxilio" href="#" hidden target="_blank" rel="noopener noreferrer"
+   aria-label="Pedir ayuda por WhatsApp: abre el chat del soporte con tu contexto (app, versión y paso) ya cargado">🛟 Ayuda</a>
+
+<script src="data.js?v=4.5"></script>
+<script src="dialogos.js?v=4.5"></script>
+<script src="medir.js?v=4.5"></script>
+<script src="cobro.js?v=4.5"></script>
+<script src="protocols.js?v=4.5"></script>
+<script src="engine.js?v=4.5"></script>
+<script src="planos.js?v=4.5"></script>
+<script src="ilustraciones.js?v=4.5"></script>
+<script src="obra.js?v=4.5"></script>
+<script src="proveedores.js?v=4.5"></script>
+<script src="ia.js?v=4.5"></script>
+<script src="sec-core.js?v=4.5"></script>
+<script src="auth.js?v=4.5"></script>
+<script src="enterprise.js?v=4.5"></script>
+<script src="ui.js?v=4.5"></script>
 </body>
 </html>
